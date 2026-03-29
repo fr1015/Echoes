@@ -4,9 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <!-- cssの読み込み -->
+    <link rel="stylesheet" href="../static/css/reset.css">
+    <link rel="stylesheet" href="../static/css/index.css">
+
 </head>
+
 <body>
-    <h1>一人用マイクロブログ</h1>
-    <p>はろーわーるど</p>
+    <div class="main-content">
+        <h1 class="title-h1">Echoes</h1>
+        <p class="welcome-message">Welcome to Echoes!</p>
+
+        <!-- フォーム部分 -->
+        <form method="post">
+            <div class="form-br">
+                <input type="text" name="username" placeholder="ID" required>
+                <input type="password" name="password" placeholder="パスワード" required>
+                <button type="submit" class="login-button">ログイン</button>
+            </div>
+        </form>
+    </div>
 </body>
 </html>

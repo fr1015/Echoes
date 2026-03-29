@@ -1,0 +1,44 @@
+
+/* .maincontent は上下左右に対して中央に */
+.main-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh; /* ビューポートの高さを100%に */
+}
+
+.title-h1 {
+    font-size: 48px;
+    margin-bottom: 10px;
+}
+.welcome-message {
+    text-align: center;
+    margin-top: 0px;
+    margin-bottom: 40px; /* メッセージとフォームの間にスペースを追加 */
+}
+
+/* フォーム全体を中央に配置 */
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+/* 入力フィールドを縦に配置 */
+.form-br {
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* 入力フィールド間のスペース */
+}
+.login-button {
+    padding: 5px 10px;
+    font-size: 16px;
+    background-color: #283645;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+
+    width: 100px; /* 横幅を100pxに設定 */       
+    margin: 10px auto; /* 中央に配置 */
+}
