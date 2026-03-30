@@ -1,12 +1,17 @@
 # 一人用マイクロブログ（SNSライク）アプリケーションの制作
 
-from sqlalchemy.orm import joinedload
-from datetime import datetime, timedelta, timezone
-
-from flask import Flask, abort, jsonify, redirect, render_template, request, url_for
+from flask import Flask, abort, jsonify, redirect, render_template, request, url_for, Blueprint
+from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 import flask_login
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+
+from sqlalchemy.orm import joinedload
+from sqlalchemy import event
+from sqlalchemy.engine import Engine
+import sqlite3
+
+from datetime import datetime, timedelta, timezone
 
 from dotenv import load_dotenv
 import os
@@ -15,12 +20,20 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import cryptography
 
 from models import db, Auth
+# from routes import bp as main_bp
 
 
 
 # =====================================================================================================
 
 
+
+# SQLiteで外部キー制約を有効にするためのイベントリスナー
+@event.listens_for(Engine, "connect")
+def set_sqlite_pragma(dbapi_connection, connection_record):
+    cursor = dbapi_connection.cursor()
+    cursor.execute("PRAGMA foreign_keys=ON")
+    cursor.close()
 
 # Flaskアプリケーションの作成と設定
 def create_app():
@@ -46,9 +59,16 @@ def create_app():
     db.init_app(app)
     Migrate(app, db)
 
+    # ブループリントの登録
+    # app.register_blueprint(main_bp)
+
     return app
 
 app = create_app()
+
+
+
+# =====================================================================================================
 
 
 
@@ -86,4 +106,5 @@ def home():
 
 if __name__ == '__main__':
     # アプリの起動
+
     app.run(debug=True)
