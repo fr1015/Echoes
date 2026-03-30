@@ -17,8 +17,8 @@ import cryptography
 from models import db, Auth
 
 
-# ========================================================================
 
+# =====================================================================================================
 
 
 
@@ -74,8 +74,7 @@ def index():
             login_user(user)  # ログイン状態にする
             return redirect(url_for('home'))  # ログイン後ページへ
         else:
-            print(user, "error")
-            return "ログイン失敗"
+            return render_template('index.html', error='ユーザーIDまたはパスワードが正しくありません。')
 
     return render_template('index.html')
 

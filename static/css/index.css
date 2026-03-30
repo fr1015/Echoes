@@ -42,3 +42,7 @@ form {
     width: 100px; /* 横幅を100pxに設定 */       
     margin: 10px auto; /* 中央に配置 */
 }
+.error-message {
+    color: red;
+    margin-top: 10px;
+}
