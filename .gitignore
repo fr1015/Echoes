@@ -1,6 +1,5 @@
 .venv/
 .env
-hash.py
 db/
 *.db
 *.sqlite3
