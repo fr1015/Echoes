@@ -106,5 +106,4 @@ def home():
 
 if __name__ == '__main__':
     # アプリの起動
-
     app.run(debug=True)
