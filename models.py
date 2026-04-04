@@ -7,9 +7,9 @@ db = SQLAlchemy()
 from flask_login import UserMixin
 
 class Auth(db.Model, UserMixin):
-    Auth_userid = db.Column(db.String(30), primary_key=True)
-    Auth_password_hash = db.Column(db.String(255))
-
+    user_id = db.Column(db.String(30), primary_key=True)
+    password_hash = db.Column(db.String(255))
+    
     def get_id(self):
-        return str(self.Auth_userid)
+        return str(self.user_id)
 

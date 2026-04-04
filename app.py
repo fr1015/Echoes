@@ -87,10 +87,10 @@ def index():
         password = request.form.get('password')
 
         # IDでユーザー取得
-        user = Auth.query.filter_by(Auth_userid=user_id).first()
+        user = Auth.query.filter_by(user_id=user_id).first()
 
         # ユーザー存在 + パスワード一致
-        if user and check_password_hash(user.Auth_password_hash, password):
+        if user and check_password_hash(user.password_hash, password):
             login_user(user)  # ログイン状態にする
             return redirect(url_for('home'))  # ログイン後ページへ
         else:
@@ -98,11 +98,15 @@ def index():
 
     return render_template('index.html')
 
+
+
 # ホーム画面
 @app.route('/home')
 @login_required # ログイン必須
 def home():
     return render_template('home.html', user=current_user)
+
+
 
 if __name__ == '__main__':
     # アプリの起動
