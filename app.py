@@ -4,7 +4,7 @@ from flask import Flask, abort, jsonify, redirect, render_template, request, url
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 import flask_login
-from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+from flask_login import LoginManager, login_user, logout_user, login_required, current_user, UserMixin
 
 from sqlalchemy.orm import joinedload
 from sqlalchemy import event
@@ -59,6 +59,8 @@ def create_app():
     db.init_app(app)
     Migrate(app, db)
 
+    login_manager.login_view = 'login'
+
     # ブループリントの登録
     # app.register_blueprint(main_bp)
 
@@ -74,13 +76,15 @@ app = create_app()
 
 @app.route('/')
 def start():
-    return redirect(url_for('index'))
+    return redirect(url_for('login'))
 
 
 
-# メイン画面
+# ログイン画面
 @app.route('/login', methods=['GET', 'POST'])
-def index():
+def login():
+    print(f"ぷりんと: {current_user},{type(current_user)},{current_user.is_authenticated}")
+
     # IDとパスワードでユーザー認証
     if request.method == 'POST':
         user_id = request.form.get('userid')
@@ -97,6 +101,15 @@ def index():
             return render_template('index.html', error='ユーザーIDまたはパスワードが正しくありません。')
 
     return render_template('index.html')
+
+
+
+# ログアウト処理
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('login'))
 
 
 
