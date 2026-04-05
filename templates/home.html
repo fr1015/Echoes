@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
+    /* ===== CSS VARIABLES ===== */
     :root {
       --bg: #f4f5f0;
       --surface: #ffffff;
@@ -22,6 +23,7 @@
       --accent-muted: #bdd98a;
       --sidebar-w: 220px;
       --rightbar-w: 300px;
+      --bottombar-h: 60px;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -34,6 +36,7 @@
       font-size: 14px;
     }
 
+    /* ===== PC LAYOUT ===== */
     .layout {
       display: grid;
       grid-template-columns: var(--sidebar-w) 1fr var(--rightbar-w);
@@ -42,7 +45,7 @@
       margin: 0 auto;
     }
 
-    /* ===== LEFT SIDEBAR ===== */
+    /* ===== LEFT SIDEBAR (PC) ===== */
     .sidebar {
       position: sticky;
       top: 0;
@@ -166,13 +169,13 @@
 
     .main-header h1 { font-size: 17px; font-weight: 700; color: var(--text-primary); }
 
+    /* ===== COMPOSER (PC inline) ===== */
     .composer {
       padding: 20px 24px;
       border-bottom: 8px solid var(--border-light);
     }
 
     .composer-inner { display: flex; gap: 12px; }
-
     .composer-body { flex: 1; display: flex; flex-direction: column; gap: 12px; }
 
     .composer textarea {
@@ -218,6 +221,7 @@
 
     .submit-btn:hover { background: var(--accent-hover); }
 
+    /* ===== TL EMPTY ===== */
     .tl-empty {
       display: flex;
       flex-direction: column;
@@ -273,9 +277,7 @@
     }
 
     .heatmap-outer { width: 100%; overflow: hidden; }
-
-    /* grid layout は JS で設定 */
-    .heatmap-grid { display: grid; gap: 3px; width: 100%; }
+    .heatmap-grid { display: grid; }
 
     .heatmap-cell {
       border-radius: 2px;
@@ -307,19 +309,7 @@
 
     .heatmap-cell:hover .tooltip { opacity: 1; }
 
-    .heatmap-legend {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      margin-top: 8px;
-      justify-content: flex-end;
-    }
-
-    .heatmap-legend span { font-size: 10px; color: var(--text-muted); }
-
-    .legend-cell { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
-
-    /* Memo */
+    /* ===== MEMO ===== */
     .memo-textarea {
       width: 100%;
       border: 1px solid var(--border);
@@ -337,7 +327,6 @@
     }
 
     .memo-textarea:focus { border-color: var(--accent-muted); background: white; }
-
     .memo-actions { display: flex; gap: 8px; margin-top: 8px; }
 
     .btn-sm {
@@ -374,12 +363,232 @@
     }
 
     .post-btn-right:hover { background: #333; }
+
+    /* ===== MODAL ===== */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(3px);
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    /* スマホでは画面下部からスライドアップ */
+    .modal-box {
+      background: var(--surface);
+      border-radius: 16px;
+      padding: 24px;
+      width: 560px;
+      max-width: 95vw;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+      animation: modalIn 0.2s ease;
+    }
+
+    @keyframes modalIn {
+      from { opacity: 0; transform: translateY(16px) scale(0.98); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .modal-title { font-size: 15px; font-weight: 700; }
+
+    .modal-close {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      border: none;
+      background: var(--border-light);
+      color: var(--text-secondary);
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s;
+      line-height: 1;
+    }
+
+    .modal-close:hover { background: var(--border); }
+
+    .modal-composer { display: flex; gap: 12px; }
+    .modal-composer-body { flex: 1; display: flex; flex-direction: column; gap: 12px; }
+
+    .modal-composer textarea {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-family: 'Noto Sans JP', sans-serif;
+      font-size: 14px;
+      resize: vertical;
+      min-height: 120px;
+      color: var(--text-primary);
+      background: var(--bg);
+      outline: none;
+      transition: border-color 0.15s;
+      line-height: 1.6;
+    }
+
+    .modal-composer textarea:focus { border-color: var(--accent-muted); background: white; }
+    .modal-composer textarea::placeholder { color: var(--text-muted); }
+
+    .modal-footer {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 12px;
+    }
+
+    /* ===== MOBILE BOTTOM NAV ===== */
+    .bottom-nav {
+      display: none; /* SP only */
+    }
+
+    /* ===== MOBILE FAB ===== */
+    .fab {
+      display: none; /* SP only */
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+      /* PC要素を非表示 */
+      .sidebar  { display: none; }
+      .rightbar { display: none; }
+      .composer { display: none; }
+
+      /* レイアウトを1カラムに */
+      .layout {
+        grid-template-columns: 1fr;
+        padding-bottom: var(--bottombar-h);
+      }
+
+      .main { border-right: none; }
+
+      .main-header {
+        padding: 14px 16px;
+      }
+
+      /* ===== BOTTOM NAV ===== */
+      .bottom-nav {
+        display: flex;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: var(--bottombar-h);
+        background: var(--surface);
+        border-top: 1px solid var(--border);
+        z-index: 100;
+        align-items: center;
+        justify-content: space-around;
+        padding: 0 8px;
+      }
+
+      .bottom-nav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 3px;
+        padding: 6px 16px;
+        border-radius: 10px;
+        text-decoration: none;
+        color: var(--text-muted);
+        font-size: 10px;
+        font-weight: 500;
+        transition: color 0.15s;
+        border: none;
+        background: none;
+        cursor: pointer;
+        font-family: 'Noto Sans JP', sans-serif;
+        flex: 1;
+      }
+
+      .bottom-nav-item .bn-icon { font-size: 20px; line-height: 1; }
+      .bottom-nav-item.active { color: var(--accent); }
+      .bottom-nav-item:hover { color: var(--text-primary); }
+
+      /* ===== FAB ===== */
+      .fab {
+        display: flex;
+        position: fixed;
+        bottom: calc(var(--bottombar-h) + 16px);
+        right: 20px;
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        background: var(--accent);
+        color: white;
+        border: none;
+        font-size: 22px;
+        cursor: pointer;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 16px rgba(106,158,47,0.45);
+        z-index: 200;
+        transition: background 0.15s, transform 0.15s;
+      }
+
+      .fab:hover { background: var(--accent-hover); transform: scale(1.08); }
+      .fab:active { transform: scale(0.95); }
+
+      /* モバイルモーダルは下からスライドアップ */
+      .modal-overlay { align-items: flex-end; }
+
+      .modal-box {
+        width: 100%;
+        max-width: 100%;
+        border-radius: 20px 20px 0 0;
+        padding: 20px 16px 32px;
+        animation: modalSlideUp 0.25s ease;
+      }
+
+      @keyframes modalSlideUp {
+        from { opacity: 0; transform: translateY(100%); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+
+      /* モバイル用TLパディング */
+      .tl-empty { padding: 60px 16px; }
+    }
   </style>
 </head>
 <body>
+
+<!-- ===== POST MODAL (共通) ===== -->
+<div class="modal-overlay" id="postModal" onclick="handleModalOverlayClick(event)">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span class="modal-title">新しいポスト</span>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-composer">
+      <div class="avatar sm">K</div>
+      <div class="modal-composer-body">
+        <textarea id="modalPostText" placeholder="いまどうしてる？" maxlength="500" oninput="updateModalCharCount()"></textarea>
+        <div class="modal-footer">
+          <span class="char-count" id="modalCharCount">0 / 500</span>
+          <button class="submit-btn" onclick="submitModalPost()">ポストする</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="layout">
 
-  <!-- ===== LEFT SIDEBAR ===== -->
+  <!-- ===== LEFT SIDEBAR (PC) ===== -->
   <aside class="sidebar">
     <a class="logo" href="#">
       <div class="logo-icon">🌿</div>
@@ -413,6 +622,7 @@
       <h1>タイムライン</h1>
     </div>
 
+    <!-- PC: インラインコンポーザー -->
     <div class="composer">
       <div class="composer-inner">
         <div class="avatar sm">K</div>
@@ -426,6 +636,7 @@
       </div>
     </div>
 
+    <!-- TL -->
     <div id="timeline">
       <div class="tl-empty">
         <div class="tl-empty-icon">🌱</div>
@@ -434,7 +645,7 @@
     </div>
   </main>
 
-  <!-- ===== RIGHT SIDEBAR ===== -->
+  <!-- ===== RIGHT SIDEBAR (PC) ===== -->
   <aside class="rightbar">
 
     <div class="widget">
@@ -443,7 +654,6 @@
       <div class="heatmap-outer">
         <div class="heatmap-grid" id="heatmapGrid"></div>
       </div>
-
     </div>
 
     <div class="widget">
@@ -457,19 +667,42 @@
 
     <div class="rightbar-spacer"></div>
 
-    <button class="post-btn-right" onclick="focusComposer()">ポストする</button>
+    <!-- PC: ポストするボタン → モーダルを開く -->
+    <button class="post-btn-right" onclick="openModal()">ポストする</button>
 
   </aside>
 </div>
 
+<!-- ===== MOBILE BOTTOM NAV ===== -->
+<nav class="bottom-nav">
+  <a class="bottom-nav-item active" href="#">
+    <span class="bn-icon">🏠</span>
+    <span>TL</span>
+  </a>
+  <a class="bottom-nav-item" href="#">
+    <span class="bn-icon">📝</span>
+    <span>ログ</span>
+  </a>
+  <a class="bottom-nav-item" href="#">
+    <span class="bn-icon">🗂️</span>
+    <span>ドライブ</span>
+  </a>
+  <a class="bottom-nav-item" href="#profile">
+    <span class="bn-icon">👤</span>
+    <span>プロフィール</span>
+  </a>
+</nav>
+
+<!-- ===== MOBILE FAB ===== -->
+<button class="fab" onclick="openModal()" aria-label="ポストする">✏️</button>
+
 <script>
-// ===== CHAR COUNT =====
+// ===== PC インラインコンポーザー =====
 function updateCharCount() {
   const ta = document.getElementById("postText");
   document.getElementById("charCount").textContent = `${ta.value.length} / 500`;
 }
 
-// ===== SUBMIT =====
 function submitPost() {
   const ta = document.getElementById("postText");
   if (!ta.value.trim()) return;
@@ -478,10 +711,38 @@ function submitPost() {
   addHeatmapPost();
 }
 
-function focusComposer() {
-  document.getElementById("postText").focus();
-  document.getElementById("postText").scrollIntoView({ behavior: "smooth", block: "center" });
+// ===== モーダル =====
+function openModal() {
+  document.getElementById("postModal").classList.add("open");
+  setTimeout(() => document.getElementById("modalPostText").focus(), 50);
 }
+
+function closeModal() {
+  document.getElementById("postModal").classList.remove("open");
+}
+
+function handleModalOverlayClick(e) {
+  if (e.target === document.getElementById("postModal")) closeModal();
+}
+
+function updateModalCharCount() {
+  const ta = document.getElementById("modalPostText");
+  document.getElementById("modalCharCount").textContent = `${ta.value.length} / 500`;
+}
+
+function submitModalPost() {
+  const ta = document.getElementById("modalPostText");
+  if (!ta.value.trim()) return;
+  ta.value = "";
+  updateModalCharCount();
+  closeModal();
+  addHeatmapPost();
+}
+
+// Escキーで閉じる
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") closeModal();
+});
 
 // ===== MEMO =====
 function saveMemo() {
@@ -490,10 +751,12 @@ function saveMemo() {
   btn.textContent = "保存済み ✓";
   setTimeout(() => btn.textContent = "保存", 1500);
 }
+
 function clearMemo() {
   document.getElementById("memoText").value = "";
   localStorage.removeItem("memo");
 }
+
 window.addEventListener("load", () => {
   const saved = localStorage.getItem("memo");
   if (saved) document.getElementById("memoText").value = saved;
@@ -507,26 +770,25 @@ function dateKey(d) {
   return d.toISOString().split("T")[0];
 }
 
-// ダミーデータなし（DBから読み込む想定）
-
 function addHeatmapPost() {
   buildHeatmap();
 }
 
 function buildHeatmap() {
   const container = document.getElementById("heatmapGrid");
+  if (!container) return;
   const outer = container.parentElement;
   const outerW = outer.clientWidth;
 
-  const ROWS = 7;
-  const COLS = 9; // 約2ヶ月分（9週）
+  const ROWS = 5;
+  const COLS = 15;
   const gap = 4;
-  // 利用可能な幅からセルサイズを逆算
   const cellSize = Math.max(8, Math.floor((outerW - gap * (COLS - 1)) / COLS));
   const totalW = cellSize * COLS + gap * (COLS - 1);
 
   container.style.gridTemplateColumns = `repeat(${COLS}, ${cellSize}px)`;
   container.style.gridTemplateRows = `repeat(${ROWS}, ${cellSize}px)`;
+  container.style.gap = gap + "px";
   container.style.width = totalW + "px";
   container.innerHTML = "";
 
@@ -536,8 +798,8 @@ function buildHeatmap() {
 
   const fmt = d =>
     `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
-  document.getElementById("heatmapRange").textContent =
-    `${fmt(startDate)} ～ ${fmt(today)}`;
+  const rangeEl = document.getElementById("heatmapRange");
+  if (rangeEl) rangeEl.textContent = `${fmt(startDate)} ～ ${fmt(today)}`;
 
   for (let col = 0; col < COLS; col++) {
     for (let row = 0; row < ROWS; row++) {
@@ -570,6 +832,7 @@ window.addEventListener("resize", () => {
   resizeTimer = setTimeout(buildHeatmap, 80);
 });
 
+// ===== INIT =====
 buildHeatmap();
 </script>
 </body>
