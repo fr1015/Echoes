@@ -85,6 +85,10 @@ def start():
 def login():
     print(f"ぷりんと: {current_user},{type(current_user)},{current_user.is_authenticated}")
 
+    # すでにログインしている場合はホームへリダイレクト
+    if current_user.is_authenticated:
+        return redirect(url_for('home')) 
+
     # IDとパスワードでユーザー認証
     if request.method == 'POST':
         user_id = request.form.get('userid')
