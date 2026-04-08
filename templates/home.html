@@ -7,57 +7,111 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
-    /* ===== CSS VARIABLES ===== */
+    /* ===== VARIABLES ===== */
     :root {
-      --bg: #f4f5f0;
-      --surface: #ffffff;
+      --bg:            #f4f5f0;
+      --surface:       #ffffff;
       --surface-hover: #f7f8f3;
-      --border: #e2e6d8;
-      --border-light: #ecefe6;
-      --text-primary: #1a1e14;
-      --text-secondary: #626b55;
-      --text-muted: #9aa38a;
-      --accent: #6a9e2f;
-      --accent-hover: #5a8a24;
-      --accent-light: #eef5e0;
-      --accent-muted: #bdd98a;
-      --sidebar-w: 220px;
-      --rightbar-w: 300px;
+      --border:        #e2e6d8;
+      --border-light:  #ecefe6;
+      --text-primary:  #1a1e14;
+      --text-secondary:#626b55;
+      --text-muted:    #9aa38a;
+      --accent:        #6a9e2f;
+      --accent-hover:  #5a8a24;
+      --accent-light:  #eef5e0;
+      --accent-muted:  #bdd98a;
+
+      /* サイドバー幅 */
+      --left-w:  260px;   /* 左サイドバー（画面左端から） */
+      --right-w: 320px;   /* 右サイドバー（画面右端から） */
       --bottombar-h: 60px;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    body {
+    html, body {
       font-family: 'Noto Sans JP', sans-serif;
-      background: var(--bg);
       color: var(--text-primary);
-      min-height: 100vh;
       font-size: 14px;
+      /* bodyに背景色を持たせない。各領域が自分で色を持つ */
+      background: var(--bg);
     }
 
-    /* ===== PC LAYOUT ===== */
-    .layout {
-      display: grid;
-      grid-template-columns: var(--sidebar-w) 1fr var(--rightbar-w);
-      min-height: 100vh;
-      max-width: 1280px;
-      margin: 0 auto;
-    }
+    /* ========================================
+       PC レイアウト
+       左サイドバー: fixed, 左端から --left-w
+       右サイドバー: fixed, 右端から --right-w
+       main: 左右サイドバーを margin で避ける
+    ======================================== */
 
-    /* ===== LEFT SIDEBAR (PC) ===== */
-    .sidebar {
-      position: sticky;
+    /* ===== 左サイドバー ===== */
+    .sidebar-left {
+      position: fixed;
       top: 0;
+      left: 0;
+      width: var(--left-w);
       height: 100vh;
+      background: var(--surface);   /* 白 — 左端まで白が広がる */
+      border-right: 1px solid var(--border);
       display: flex;
       flex-direction: column;
-      padding: 24px 16px;
-      border-right: 1px solid var(--border);
-      background: var(--surface);
+      padding: 24px 20px;
       gap: 4px;
+      z-index: 50;
+      overflow-y: auto;
     }
 
+    /* ===== 右サイドバー ===== */
+    .sidebar-right {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: var(--right-w);
+      height: 100vh;
+      background: var(--bg);        /* bgカラー — 右端まで広がる */
+      border-left: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 24px 20px;
+      gap: 16px;
+      z-index: 50;
+      overflow-y: auto;
+    }
+
+    .sidebar-right::-webkit-scrollbar { width: 4px; }
+    .sidebar-right::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    /* ===== メインコンテンツ ===== */
+    /* 左右サイドバーの幅だけ margin で避ける。背景は --bg */
+    .main {
+      margin-left: var(--left-w);
+      margin-right: var(--right-w);
+      min-height: 100vh;
+      background: var(--bg);
+      border-right: 1px solid var(--border);
+      padding: 0 20px;
+    }
+
+    /* ヘッダーはsticky */
+    .main-header {
+      position: sticky;
+      top: 0;
+      background: rgba(244,245,240,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 44px; /* 24px + 20px padding分 */
+      z-index: 40;
+      margin: 0 -20px; /* 親のpaddingを打ち消して端まで伸ばす */
+    }
+
+    .main-header h1 {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    /* ===== ロゴ ===== */
     .logo {
       display: flex;
       align-items: center;
@@ -86,6 +140,7 @@
       letter-spacing: -0.3px;
     }
 
+    /* ===== ナビアイテム ===== */
     .nav-item {
       display: flex;
       align-items: center;
@@ -96,7 +151,7 @@
       color: var(--text-secondary);
       font-weight: 500;
       font-size: 14px;
-      transition: all 0.15s ease;
+      transition: all 0.15s;
       cursor: pointer;
       border: none;
       background: none;
@@ -104,21 +159,18 @@
       text-align: left;
     }
 
-    .nav-item:hover { background: var(--surface-hover); color: var(--text-primary); }
-    .nav-item.active { background: var(--accent-light); color: var(--accent); }
+    .nav-item:hover  { background: var(--surface-hover); color: var(--text-primary); }
+    .nav-item.active { background: var(--accent-light);  color: var(--accent); }
 
     .nav-item .icon {
-      width: 20px;
-      height: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 16px;
-      flex-shrink: 0;
+      width: 20px; height: 20px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; flex-shrink: 0;
     }
 
     .sidebar-spacer { flex: 1; }
 
+    /* ===== ユーザー情報 ===== */
     .user-info {
       display: flex;
       align-items: center;
@@ -133,50 +185,28 @@
     .user-info:hover { background: var(--surface-hover); }
 
     .avatar {
-      width: 36px;
-      height: 36px;
+      width: 36px; height: 36px;
       border-radius: 50%;
       background: linear-gradient(135deg, var(--accent-muted), var(--accent));
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 14px;
-      font-weight: 700;
-      color: white;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 700; color: white;
       flex-shrink: 0;
     }
 
     .avatar.sm { width: 40px; height: 40px; font-size: 15px; }
 
-    .user-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+    .user-name   { font-size: 13px; font-weight: 600; color: var(--text-primary); }
     .user-handle { font-size: 11px; color: var(--text-muted); font-family: 'DM Mono', monospace; }
 
-    /* ===== MAIN ===== */
-    .main {
-      border-right: 1px solid var(--border);
-      background: var(--surface);
-    }
-
-    .main-header {
-      position: sticky;
-      top: 0;
-      background: rgba(255,255,255,0.92);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border);
-      padding: 16px 24px;
-      z-index: 10;
-    }
-
-    .main-header h1 { font-size: 17px; font-weight: 700; color: var(--text-primary); }
-
-    /* ===== COMPOSER (PC inline) ===== */
+    /* ===== コンポーザー ===== */
     .composer {
       padding: 20px 24px;
       border-bottom: 8px solid var(--border-light);
+      background: var(--surface);
     }
 
     .composer-inner { display: flex; gap: 12px; }
-    .composer-body { flex: 1; display: flex; flex-direction: column; gap: 12px; }
+    .composer-body  { flex: 1; display: flex; flex-direction: column; gap: 12px; }
 
     .composer textarea {
       width: 100%;
@@ -194,63 +224,39 @@
       line-height: 1.6;
     }
 
-    .composer textarea:focus { border-color: var(--accent-muted); background: white; }
-    .composer textarea::placeholder { color: var(--text-muted); }
+    .composer textarea:focus       { border-color: var(--accent-muted); background: white; }
+    .composer textarea::placeholder{ color: var(--text-muted); }
 
     .composer-footer {
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      gap: 12px;
+      display: flex; align-items: center;
+      justify-content: flex-end; gap: 12px;
     }
 
     .char-count { font-size: 11px; color: var(--text-muted); font-family: 'DM Mono', monospace; }
 
     .submit-btn {
       padding: 9px 22px;
-      background: var(--accent);
-      color: white;
-      border: none;
-      border-radius: 8px;
+      background: var(--accent); color: white;
+      border: none; border-radius: 8px;
       font-family: 'Noto Sans JP', sans-serif;
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: background 0.15s;
+      font-size: 13px; font-weight: 700;
+      cursor: pointer; transition: background 0.15s;
     }
 
     .submit-btn:hover { background: var(--accent-hover); }
 
-    /* ===== TL EMPTY ===== */
+    /* ===== TL空状態 ===== */
     .tl-empty {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
       padding: 60px 24px;
-      color: var(--text-muted);
-      gap: 10px;
+      color: var(--text-muted); gap: 10px;
     }
 
     .tl-empty-icon { font-size: 36px; opacity: 0.4; }
     .tl-empty-text { font-size: 14px; }
 
-    /* ===== RIGHT SIDEBAR ===== */
-    .rightbar {
-      position: sticky;
-      top: 0;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      padding: 24px 20px;
-      background: var(--bg);
-      gap: 16px;
-      overflow-y: auto;
-    }
-
-    .rightbar::-webkit-scrollbar { width: 4px; }
-    .rightbar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
+    /* ===== ウィジェット ===== */
     .widget {
       background: var(--surface);
       border-radius: 14px;
@@ -259,31 +265,26 @@
     }
 
     .widget-title {
-      font-size: 13px;
-      font-weight: 700;
+      font-size: 13px; font-weight: 700;
       color: var(--text-secondary);
-      text-transform: uppercase;
-      letter-spacing: 0.6px;
+      text-transform: uppercase; letter-spacing: 0.6px;
       margin-bottom: 12px;
     }
 
-    /* ===== HEATMAP ===== */
+    /* ===== ヒートマップ ===== */
     .heatmap-subtitle {
-      font-size: 11px;
-      color: var(--text-muted);
+      font-size: 11px; color: var(--text-muted);
       font-family: 'DM Mono', monospace;
-      margin-bottom: 10px;
-      margin-top: -6px;
+      margin-bottom: 10px; margin-top: -6px;
     }
 
     .heatmap-outer { width: 100%; overflow: hidden; }
-    .heatmap-grid { display: grid; }
+    .heatmap-grid  { display: grid; }
 
     .heatmap-cell {
       border-radius: 2px;
       background: var(--border-light);
-      cursor: default;
-      position: relative;
+      cursor: default; position: relative;
       transition: transform 0.1s;
     }
 
@@ -291,100 +292,70 @@
 
     .heatmap-cell .tooltip {
       position: absolute;
-      bottom: calc(100% + 5px);
-      left: 50%;
+      bottom: calc(100% + 5px); left: 50%;
       transform: translateX(-50%);
-      background: rgba(26,30,20,0.88);
-      color: white;
-      padding: 4px 8px;
-      border-radius: 5px;
-      font-size: 10px;
-      white-space: nowrap;
-      pointer-events: none;
-      opacity: 0;
+      background: rgba(26,30,20,0.88); color: white;
+      padding: 4px 8px; border-radius: 5px;
+      font-size: 10px; white-space: nowrap;
+      pointer-events: none; opacity: 0;
       transition: opacity 0.15s;
-      font-family: 'DM Mono', monospace;
-      z-index: 100;
+      font-family: 'DM Mono', monospace; z-index: 100;
     }
 
     .heatmap-cell:hover .tooltip { opacity: 1; }
 
-    /* ===== MEMO ===== */
+    /* ===== メモ ===== */
     .memo-textarea {
       width: 100%;
-      border: 1px solid var(--border);
-      border-radius: 8px;
+      border: 1px solid var(--border); border-radius: 8px;
       padding: 10px 12px;
-      font-family: 'Noto Sans JP', sans-serif;
-      font-size: 13px;
-      resize: vertical;
-      min-height: 80px;
-      color: var(--text-primary);
-      background: var(--bg);
-      outline: none;
-      line-height: 1.6;
-      transition: border-color 0.15s;
+      font-family: 'Noto Sans JP', sans-serif; font-size: 13px;
+      resize: vertical; min-height: 80px;
+      color: var(--text-primary); background: var(--bg);
+      outline: none; line-height: 1.6; transition: border-color 0.15s;
     }
 
     .memo-textarea:focus { border-color: var(--accent-muted); background: white; }
     .memo-actions { display: flex; gap: 8px; margin-top: 8px; }
 
     .btn-sm {
-      padding: 6px 14px;
-      border-radius: 7px;
+      padding: 6px 14px; border-radius: 7px;
       font-family: 'Noto Sans JP', sans-serif;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      border: none;
-      transition: all 0.15s;
+      font-size: 12px; font-weight: 600;
+      cursor: pointer; border: none; transition: all 0.15s;
     }
 
-    .btn-primary { background: var(--accent); color: white; }
-    .btn-primary:hover { background: var(--accent-hover); }
-    .btn-secondary { background: var(--border-light); color: var(--text-secondary); border: 1px solid var(--border); }
-    .btn-secondary:hover { background: var(--border); }
+    .btn-primary  { background: var(--accent); color: white; }
+    .btn-primary:hover  { background: var(--accent-hover); }
+    .btn-secondary{ background: var(--border-light); color: var(--text-secondary); border: 1px solid var(--border); }
+    .btn-secondary:hover{ background: var(--border); }
 
-    .rightbar-spacer { flex: 1; }
+    .sidebar-right-spacer { flex: 1; }
 
     .post-btn-right {
-      width: 100%;
-      padding: 13px;
-      background: var(--text-primary);
-      color: white;
-      border: none;
-      border-radius: 10px;
+      width: 100%; padding: 13px;
+      background: var(--text-primary); color: white;
+      border: none; border-radius: 10px;
       font-family: 'Noto Sans JP', sans-serif;
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: background 0.15s;
-      flex-shrink: 0;
+      font-size: 14px; font-weight: 700;
+      cursor: pointer; transition: background 0.15s; flex-shrink: 0;
     }
 
     .post-btn-right:hover { background: #333; }
 
-    /* ===== MODAL ===== */
+    /* ===== モーダル ===== */
     .modal-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.45);
-      z-index: 1000;
-      align-items: center;
-      justify-content: center;
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.45); z-index: 1000;
+      align-items: center; justify-content: center;
       backdrop-filter: blur(3px);
     }
 
     .modal-overlay.open { display: flex; }
 
-    /* スマホでは画面下部からスライドアップ */
     .modal-box {
-      background: var(--surface);
-      border-radius: 16px;
-      padding: 24px;
-      width: 560px;
-      max-width: 95vw;
+      background: var(--surface); border-radius: 16px;
+      padding: 24px; width: 560px; max-width: 95vw;
       box-shadow: 0 20px 60px rgba(0,0,0,0.2);
       animation: modalIn 0.2s ease;
     }
@@ -395,28 +366,19 @@
     }
 
     .modal-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 16px;
+      display: flex; align-items: center;
+      justify-content: space-between; margin-bottom: 16px;
     }
 
     .modal-title { font-size: 15px; font-weight: 700; }
 
     .modal-close {
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      border: none;
-      background: var(--border-light);
-      color: var(--text-secondary);
-      font-size: 16px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.15s;
-      line-height: 1;
+      width: 30px; height: 30px; border-radius: 50%;
+      border: none; background: var(--border-light);
+      color: var(--text-secondary); font-size: 16px;
+      cursor: pointer; display: flex;
+      align-items: center; justify-content: center;
+      transition: background 0.15s; line-height: 1;
     }
 
     .modal-close:hover { background: var(--border); }
@@ -425,130 +387,137 @@
     .modal-composer-body { flex: 1; display: flex; flex-direction: column; gap: 12px; }
 
     .modal-composer textarea {
-      width: 100%;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 12px 14px;
-      font-family: 'Noto Sans JP', sans-serif;
-      font-size: 14px;
-      resize: vertical;
-      min-height: 120px;
-      color: var(--text-primary);
-      background: var(--bg);
-      outline: none;
-      transition: border-color 0.15s;
-      line-height: 1.6;
+      width: 100%; border: 1px solid var(--border);
+      border-radius: 10px; padding: 12px 14px;
+      font-family: 'Noto Sans JP', sans-serif; font-size: 14px;
+      resize: vertical; min-height: 120px;
+      color: var(--text-primary); background: var(--bg);
+      outline: none; transition: border-color 0.15s; line-height: 1.6;
     }
 
-    .modal-composer textarea:focus { border-color: var(--accent-muted); background: white; }
-    .modal-composer textarea::placeholder { color: var(--text-muted); }
+    .modal-composer textarea:focus       { border-color: var(--accent-muted); background: white; }
+    .modal-composer textarea::placeholder{ color: var(--text-muted); }
 
     .modal-footer {
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      gap: 12px;
+      display: flex; align-items: center;
+      justify-content: flex-end; gap: 12px;
     }
 
-    /* ===== MOBILE BOTTOM NAV ===== */
-    .bottom-nav {
-      display: none; /* SP only */
+    /* ===== スマホ用（非表示のもの） ===== */
+    .bottom-nav { display: none; }
+    .fab        { display: none; }
+
+    /* ===== タブレット：左サイドバーをアイコンのみに折りたたむ ===== */
+    @media (min-width: 769px) and (max-width: 1200px) {
+      /* 左サイドバーをアイコン幅に縮小 */
+      :root { --left-w: 64px; }
+
+      .sidebar-left {
+        width: var(--left-w);
+        padding: 24px 12px;
+        align-items: center; /* アイコンを中央寄せ */
+      }
+
+      /* ロゴはアイコンのみ表示 */
+      .logo { padding: 8px 0; margin-bottom: 20px; justify-content: center; }
+      .logo-text { display: none; }
+
+      /* ナビテキストを非表示 */
+      .nav-item {
+        padding: 10px 0;
+        justify-content: center;
+        width: 40px;
+        position: relative;
+      }
+      .nav-item .icon { width: 24px; height: 24px; font-size: 20px; }
+
+      /* 折りたたみ時：ホバーで右にラベルをツールチップ表示 */
+      .nav-item .nav-label {
+        display: block;
+        position: absolute;
+        left: calc(100% + 10px);
+        top: 50%; transform: translateY(-50%);
+        background: rgba(26,30,20,0.88);
+        color: white; padding: 5px 10px;
+        border-radius: 6px; font-size: 12px;
+        white-space: nowrap; pointer-events: none;
+        opacity: 0; transition: opacity 0.15s;
+        z-index: 200;
+      }
+      .nav-item:hover .nav-label { opacity: 1; }
+
+      /* ユーザー情報：アバターのみ */
+      .user-info { padding: 8px 0; justify-content: center; }
+      .user-info > div { display: none; } /* 名前・ハンドル非表示 */
+
+      /* mainのmargin-leftを縮小後の幅に合わせる */
+      .main { margin-left: var(--left-w); }
     }
 
-    /* ===== MOBILE FAB ===== */
-    .fab {
-      display: none; /* SP only */
-    }
-
-    /* ===== RESPONSIVE ===== */
+    /* ===== レスポンシブ ===== */
     @media (max-width: 768px) {
-      /* PC要素を非表示 */
-      .sidebar  { display: none; }
-      .rightbar { display: none; }
-      .composer { display: none; }
+      .sidebar-left  { display: none; }
+      .sidebar-right { display: none; }
+      .composer      { display: none; }
 
-      /* レイアウトを1カラムに */
-      .layout {
-        grid-template-columns: 1fr;
+      .main {
+        margin-left: 0;
+        margin-right: 0;
+        background: var(--surface);
+        padding: 0;
         padding-bottom: var(--bottombar-h);
       }
 
-      .main { border-right: none; }
-
       .main-header {
+        background: rgba(255,255,255,0.92);
         padding: 14px 16px;
+        margin: 0;
       }
 
-      /* ===== BOTTOM NAV ===== */
+      /* ===== ボトムナビ ===== */
       .bottom-nav {
         display: flex;
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
+        position: fixed; bottom: 0; left: 0; right: 0;
         height: var(--bottombar-h);
-        background: var(--surface);
-        border-top: 1px solid var(--border);
-        z-index: 100;
-        align-items: center;
-        justify-content: space-around;
-        padding: 0 8px;
+        background: var(--surface); border-top: 1px solid var(--border);
+        z-index: 100; align-items: center;
+        justify-content: space-around; padding: 0 8px;
       }
 
       .bottom-nav-item {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 3px;
-        padding: 6px 16px;
-        border-radius: 10px;
-        text-decoration: none;
-        color: var(--text-muted);
-        font-size: 10px;
-        font-weight: 500;
-        transition: color 0.15s;
-        border: none;
-        background: none;
-        cursor: pointer;
-        font-family: 'Noto Sans JP', sans-serif;
-        flex: 1;
+        display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+        gap: 3px; padding: 6px 16px; border-radius: 10px;
+        text-decoration: none; color: var(--text-muted);
+        font-size: 10px; font-weight: 500; transition: color 0.15s;
+        border: none; background: none; cursor: pointer;
+        font-family: 'Noto Sans JP', sans-serif; flex: 1;
       }
 
       .bottom-nav-item .bn-icon { font-size: 20px; line-height: 1; }
-      .bottom-nav-item.active { color: var(--accent); }
-      .bottom-nav-item:hover { color: var(--text-primary); }
+      .bottom-nav-item.active   { color: var(--accent); }
+      .bottom-nav-item:hover    { color: var(--text-primary); }
 
       /* ===== FAB ===== */
       .fab {
-        display: flex;
-        position: fixed;
-        bottom: calc(var(--bottombar-h) + 16px);
-        right: 20px;
-        width: 52px;
-        height: 52px;
-        border-radius: 50%;
-        background: var(--accent);
-        color: white;
-        border: none;
-        font-size: 22px;
-        cursor: pointer;
-        align-items: center;
-        justify-content: center;
+        display: flex; position: fixed;
+        bottom: calc(var(--bottombar-h) + 16px); right: 20px;
+        width: 52px; height: 52px; border-radius: 50%;
+        background: var(--accent); color: white;
+        border: none; font-size: 22px; cursor: pointer;
+        align-items: center; justify-content: center;
         box-shadow: 0 4px 16px rgba(106,158,47,0.45);
-        z-index: 200;
-        transition: background 0.15s, transform 0.15s;
+        z-index: 200; transition: background 0.15s, transform 0.15s;
       }
 
-      .fab:hover { background: var(--accent-hover); transform: scale(1.08); }
+      .fab:hover  { background: var(--accent-hover); transform: scale(1.08); }
       .fab:active { transform: scale(0.95); }
 
-      /* モバイルモーダルは下からスライドアップ */
+      /* モバイルモーダル：下からスライドアップ */
       .modal-overlay { align-items: flex-end; }
 
       .modal-box {
-        width: 100%;
-        max-width: 100%;
+        width: 100%; max-width: 100%;
         border-radius: 20px 20px 0 0;
         padding: 20px 16px 32px;
         animation: modalSlideUp 0.25s ease;
@@ -559,14 +528,13 @@
         to   { opacity: 1; transform: translateY(0); }
       }
 
-      /* モバイル用TLパディング */
       .tl-empty { padding: 60px 16px; }
     }
   </style>
 </head>
 <body>
 
-<!-- ===== POST MODAL (共通) ===== -->
+<!-- ===== POST MODAL ===== -->
 <div class="modal-overlay" id="postModal" onclick="handleModalOverlayClick(event)">
   <div class="modal-box">
     <div class="modal-header">
@@ -586,118 +554,106 @@
   </div>
 </div>
 
-<div class="layout">
+<!-- ===== 左サイドバー ===== -->
+<aside class="sidebar-left">
+  <a class="logo" href="#">
+    <div class="logo-icon">🌿</div>
+    <span class="logo-text">MySNS</span>
+  </a>
 
-  <!-- ===== LEFT SIDEBAR (PC) ===== -->
-  <aside class="sidebar">
-    <a class="logo" href="#">
-      <div class="logo-icon">🌿</div>
-      <span class="logo-text">MySNS</span>
-    </a>
+  <a class="nav-item active" href="#">
+    <span class="icon">🏠</span><span class="nav-label"> タイムライン</span>
+  </a>
+  <a class="nav-item" href="#">
+    <span class="icon">📝</span><span class="nav-label"> ポストログ</span>
+  </a>
+  <a class="nav-item" href="#">
+    <span class="icon">🗂️</span><span class="nav-label"> ドライブ</span>
+  </a>
 
-    <a class="nav-item active" href="#">
-      <span class="icon">🏠</span> タイムライン
-    </a>
-    <a class="nav-item" href="#">
-      <span class="icon">📝</span> ポストログ
-    </a>
-    <a class="nav-item" href="#">
-      <span class="icon">🗂️</span> ドライブ
-    </a>
+  <div class="sidebar-spacer"></div>
 
-    <div class="sidebar-spacer"></div>
-
-    <a class="user-info" href="#profile">
-      <div class="avatar">K</div>
-      <div>
-        <div class="user-name">kan</div>
-        <div class="user-handle">@lifelog_kan</div>
-      </div>
-    </a>
-  </aside>
-
-  <!-- ===== MAIN ===== -->
-  <main class="main">
-    <div class="main-header">
-      <h1>タイムライン</h1>
+  <a class="user-info" href="#profile">
+    <div class="avatar">K</div>
+    <div>
+      <div class="user-name">kan</div>
+      <div class="user-handle">@lifelog_kan</div>
     </div>
+  </a>
+</aside>
 
-    <!-- PC: インラインコンポーザー -->
-    <div class="composer">
-      <div class="composer-inner">
-        <div class="avatar sm">K</div>
-        <div class="composer-body">
-          <textarea id="postText" placeholder="いまどうしてる？" maxlength="500" oninput="updateCharCount()"></textarea>
-          <div class="composer-footer">
-            <span class="char-count" id="charCount">0 / 500</span>
-            <button class="submit-btn" onclick="submitPost()">ポストする</button>
-          </div>
+<!-- ===== メインコンテンツ ===== -->
+<main class="main">
+  <div class="main-header">
+    <h1>タイムライン</h1>
+  </div>
+
+  <div class="composer">
+    <div class="composer-inner">
+      <div class="avatar sm">K</div>
+      <div class="composer-body">
+        <textarea id="postText" placeholder="いまどうしてる？" maxlength="500" oninput="updateCharCount()"></textarea>
+        <div class="composer-footer">
+          <span class="char-count" id="charCount">0 / 500</span>
+          <button class="submit-btn" onclick="submitPost()">ポストする</button>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- TL -->
-    <div id="timeline">
-      <div class="tl-empty">
-        <div class="tl-empty-icon">🌱</div>
-        <div class="tl-empty-text">まだ投稿はありません</div>
-      </div>
+  <div id="timeline">
+    <div class="tl-empty">
+      <div class="tl-empty-icon">🌱</div>
+      <div class="tl-empty-text">まだ投稿はありません</div>
     </div>
-  </main>
+  </div>
+</main>
 
-  <!-- ===== RIGHT SIDEBAR (PC) ===== -->
-  <aside class="rightbar">
-
-    <div class="widget">
-      <div class="widget-title">ポスト数ヒートマップ</div>
-      <div class="heatmap-subtitle" id="heatmapRange"></div>
-      <div class="heatmap-outer">
-        <div class="heatmap-grid" id="heatmapGrid"></div>
-      </div>
+<!-- ===== 右サイドバー ===== -->
+<aside class="sidebar-right">
+  <div class="widget">
+    <div class="widget-title">ポスト数ヒートマップ</div>
+    <div class="heatmap-subtitle" id="heatmapRange"></div>
+    <div class="heatmap-outer">
+      <div class="heatmap-grid" id="heatmapGrid"></div>
     </div>
+  </div>
 
-    <div class="widget">
-      <div class="widget-title">メモ帳</div>
-      <textarea class="memo-textarea" id="memoText" placeholder="メモを入力..."></textarea>
-      <div class="memo-actions">
-        <button class="btn-sm btn-primary" id="saveMemoBtn" onclick="saveMemo()">保存</button>
-        <button class="btn-sm btn-secondary" onclick="clearMemo()">クリア</button>
-      </div>
+  <div class="widget">
+    <div class="widget-title">メモ帳</div>
+    <textarea class="memo-textarea" id="memoText" placeholder="メモを入力..."></textarea>
+    <div class="memo-actions">
+      <button class="btn-sm btn-primary" id="saveMemoBtn" onclick="saveMemo()">保存</button>
+      <button class="btn-sm btn-secondary" onclick="clearMemo()">クリア</button>
     </div>
+  </div>
 
-    <div class="rightbar-spacer"></div>
+  <div class="sidebar-right-spacer"></div>
 
-    <!-- PC: ポストするボタン → モーダルを開く -->
-    <button class="post-btn-right" onclick="openModal()">ポストする</button>
+  <button class="post-btn-right" onclick="openModal()">ポストする</button>
+</aside>
 
-  </aside>
-</div>
-
-<!-- ===== MOBILE BOTTOM NAV ===== -->
+<!-- ===== スマホ：ボトムナビ ===== -->
 <nav class="bottom-nav">
   <a class="bottom-nav-item active" href="#">
-    <span class="bn-icon">🏠</span>
-    <span>TL</span>
+    <span class="bn-icon">🏠</span><span>TL</span>
   </a>
   <a class="bottom-nav-item" href="#">
-    <span class="bn-icon">📝</span>
-    <span>ログ</span>
+    <span class="bn-icon">📝</span><span>ログ</span>
   </a>
   <a class="bottom-nav-item" href="#">
-    <span class="bn-icon">🗂️</span>
-    <span>ドライブ</span>
+    <span class="bn-icon">🗂️</span><span>ドライブ</span>
   </a>
   <a class="bottom-nav-item" href="#profile">
-    <span class="bn-icon">👤</span>
-    <span>プロフィール</span>
+    <span class="bn-icon">👤</span><span>プロフィール</span>
   </a>
 </nav>
 
-<!-- ===== MOBILE FAB ===== -->
+<!-- ===== スマホ：FAB ===== -->
 <button class="fab" onclick="openModal()" aria-label="ポストする">✏️</button>
 
 <script>
-// ===== PC インラインコンポーザー =====
+// ===== PC コンポーザー =====
 function updateCharCount() {
   const ta = document.getElementById("postText");
   document.getElementById("charCount").textContent = `${ta.value.length} / 500`;
@@ -739,12 +695,11 @@ function submitModalPost() {
   addHeatmapPost();
 }
 
-// Escキーで閉じる
 document.addEventListener("keydown", e => {
   if (e.key === "Escape") closeModal();
 });
 
-// ===== MEMO =====
+// ===== メモ =====
 function saveMemo() {
   localStorage.setItem("memo", document.getElementById("memoText").value);
   const btn = document.getElementById("saveMemoBtn");
@@ -762,7 +717,7 @@ window.addEventListener("load", () => {
   if (saved) document.getElementById("memoText").value = saved;
 });
 
-// ===== HEATMAP =====
+// ===== ヒートマップ =====
 const heatmapData = {};
 const today = new Date();
 
@@ -770,27 +725,22 @@ function dateKey(d) {
   return d.toISOString().split("T")[0];
 }
 
-function addHeatmapPost() {
-  buildHeatmap();
-}
+function addHeatmapPost() { buildHeatmap(); }
 
 function buildHeatmap() {
   const container = document.getElementById("heatmapGrid");
   if (!container) return;
-  const outer = container.parentElement;
-  const outerW = outer.clientWidth;
+  const outerW = container.parentElement.clientWidth;
 
-  const ROWS = 5;
-  const COLS = 15;
-  const gap = 4;
+  const ROWS = 7, COLS = 9, gap = 4;
   const cellSize = Math.max(8, Math.floor((outerW - gap * (COLS - 1)) / COLS));
-  const totalW = cellSize * COLS + gap * (COLS - 1);
+  const totalW   = cellSize * COLS + gap * (COLS - 1);
 
   container.style.gridTemplateColumns = `repeat(${COLS}, ${cellSize}px)`;
-  container.style.gridTemplateRows = `repeat(${ROWS}, ${cellSize}px)`;
-  container.style.gap = gap + "px";
+  container.style.gridTemplateRows    = `repeat(${ROWS}, ${cellSize}px)`;
+  container.style.gap   = gap + "px";
   container.style.width = totalW + "px";
-  container.innerHTML = "";
+  container.innerHTML   = "";
 
   const totalDays = COLS * ROWS;
   const startDate = new Date(today);
@@ -808,14 +758,11 @@ function buildHeatmap() {
 
       const cell = document.createElement("div");
       cell.style.gridColumn = col + 1;
-      cell.style.gridRow = row + 1;
-      cell.style.width = cellSize + "px";
-      cell.style.height = cellSize + "px";
+      cell.style.gridRow    = row + 1;
+      cell.style.width      = cellSize + "px";
+      cell.style.height     = cellSize + "px";
 
-      if (d > today) {
-        container.appendChild(cell);
-        continue;
-      }
+      if (d > today) { container.appendChild(cell); continue; }
 
       const k = dateKey(d);
       const level = heatmapData[k] || 0;
@@ -832,7 +779,6 @@ window.addEventListener("resize", () => {
   resizeTimer = setTimeout(buildHeatmap, 80);
 });
 
-// ===== INIT =====
 buildHeatmap();
 </script>
 </body>
