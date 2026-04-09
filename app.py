@@ -25,7 +25,6 @@ from models import db, Auth
 
 # =====================================================================================================
 load_dotenv()
-print("ENV BEFORE:", os.getenv("DATABASE_URL"))
 
 # SQLiteで外部キー制約を有効にするためのイベントリスナー
 @event.listens_for(Engine, "connect")
@@ -53,7 +52,6 @@ def create_app():
     # DB接続
     app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    print("CONFIG:", app.config['SQLALCHEMY_DATABASE_URI'])
 
      # SQLAlchemyの初期化とマイグレーション紐づけ
     db.init_app(app)
@@ -63,12 +61,6 @@ def create_app():
 
     # ブループリントの登録
     # app.register_blueprint(main_bp)
-
-    with app.app_context():
-        print("ENGINE:", db.engine.url)
-        print("APP:", id(app))
-        print("ENGINE:", id(db.engine))
-        print("SESSION:", id(db.session))
 
     return app
 
