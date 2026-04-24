@@ -14,7 +14,7 @@ from dotenv import load_dotenv
 import os
 
 from models import db, Auth
-from login_auth import login_auth_bp
+from routes.login_auth import login_auth_bp
 
 
 # ==================================================================================================
