@@ -26,13 +26,14 @@ class Auth(db.Model, UserMixin):
 # ---------------------------------
 class users(db.Model):
     user_id = db.Column(db.String, primary_key=True)
-    username = db.Column(db.String)
+    username = db.Column(db.String, nullable=False)
     icon_path = db.Column(db.String)
     header_path = db.Column(db.String)
     bio = db.Column(db.String)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+    # リレーション
     auth = db.relationship('Auth', backref='user', uselist=False)
     posts = db.relationship('posts', backref='user', lazy=True)
     profile_updates = db.relationship('profile_update', backref='user', lazy=True)
@@ -75,11 +76,12 @@ class posts(db.Model):
     post_type = db.Column(db.String, db.CheckConstraint("post_type IN ('normal', 'reply', 'quote', 'repost')"))
     content_hash = db.Column(db.String, unique=True)
 
-    # self-referential
+    # 自己結合リレーション
     reply_to_post = db.relationship('posts', remote_side=[post_id], foreign_keys=[reply_to_post_id], backref='replies')
     quote_of_post = db.relationship('posts', remote_side=[post_id], foreign_keys=[quote_of_post_id], backref='quotes')
     repost_of_post = db.relationship('posts', remote_side=[post_id], foreign_keys=[repost_of_post_id], backref='reposts')
 
+    # リレーション
     post_bookmarks = db.relationship('post_bookmark', backref='post', lazy=True)
     post_images = db.relationship('post_images', backref='post', lazy=True)
 
@@ -91,7 +93,11 @@ class posts(db.Model):
 class post_images(db.Model):
     image_id = db.Column(db.int, primary_key=True)
     post_id = db.Column(db.int, db.ForeignKey('posts.post_id'), nullable=False)
-    image_path = db.Column(db.String)
+    image_path = db.Column(db.String, nullable=False)
+    sort_order = db.Column(db.int, nullable=False)
+
+    db.UniqueConstraint('post_id', 'sort_order', name='uq_post_image_order')
+
 
 
 # ---------------------------------
@@ -99,7 +105,18 @@ class post_images(db.Model):
 # ---------------------------------
 class tags(db.Model):
     tags_id = db.Column(db.int, primary_key=True)
-    tags_name = db.Column(db.String)
+    tags_name = db.Column(db.String, unique=True, nullable=False)
+
+
+
+# ---------------------------------
+# ポストタグモデル
+# ---------------------------------
+class post_tags(db.Model):
+    post_id = db.Column(db.int, db.ForeignKey('posts.post_id'), primary_key=True, nullable=False)
+    tags_id = db.Column(db.int, db.ForeignKey('tags.tags_id'), primary_key=True, nullable=False, index=True)
+
+    db.UniqueConstraint('post_id', 'tags_id', name='uq_post_tags')
 
 
 
@@ -111,18 +128,4 @@ class post_bookmark(db.Model):
     post_id = db.Column(db.int, db.ForeignKey('posts.post_id'), primary_key=True, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-
-
-
-
-# ---------------------------------
-# ポストモデル
-# ---------------------------------
-class posts(db.Model):
-    post_id = db.Column(db.int, primary_key=True)
-    user_id = db.Column(db.String, db.ForeignKey('users.user_id'))
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
-    created_app = db.Column(db.String)
-    content = db.Column(db.String)
