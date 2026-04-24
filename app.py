@@ -9,21 +9,17 @@ from flask_login import LoginManager, login_user, logout_user, login_required, c
 from sqlalchemy.orm import joinedload
 from sqlalchemy import event
 from sqlalchemy.engine import Engine
-import sqlite3
-
-from datetime import datetime, timedelta, timezone
 
 from dotenv import load_dotenv
 import os
 
-from werkzeug.security import generate_password_hash, check_password_hash
-import cryptography
-
 from models import db, Auth
+from login_auth import login_auth_bp
 
 
+# ==================================================================================================
 
-# =====================================================================================================
+
 load_dotenv()
 
 # SQLiteで外部キー制約を有効にするためのイベントリスナー
@@ -38,7 +34,6 @@ def create_app():
     app = Flask(__name__)
 
     # 環境変数の読み込み
-
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 
     # ログインマネージャーの設定
@@ -53,14 +48,15 @@ def create_app():
     app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-     # SQLAlchemyの初期化とマイグレーション紐づけ
+    # SQLAlchemyの初期化とマイグレーション紐づけ
     db.init_app(app)
     Migrate(app, db)
 
     login_manager.login_view = 'login'
 
     # ブループリントの登録
-    # app.register_blueprint(main_bp)
+    app.register_blueprint(login_auth_bp)
+
 
     return app
 
@@ -69,57 +65,6 @@ app = create_app()
 
 
 # =================================================================================================
-
-
-
-@app.route('/')
-def start():
-    return redirect(url_for('login'))
-
-
-
-# ログイン画面
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    print(f"ぷりんと: {current_user},{type(current_user)},{current_user.is_authenticated}")
-
-    # すでにログインしている場合はホームへリダイレクト
-    if current_user.is_authenticated:
-        return redirect(url_for('home')) 
-
-    # IDとパスワードでユーザー認証
-    if request.method == 'POST':
-        user_id = request.form.get('userid')
-        password = request.form.get('password')
-
-        # IDでユーザー取得
-        user = Auth.query.filter_by(user_id=user_id).first()
-
-        # ユーザー存在 + パスワード一致
-        if user and check_password_hash(user.password_hash, password):
-            login_user(user)  # ログイン状態にする
-            return redirect(url_for('home'))  # ログイン後ページへ
-        else:
-            return render_template('index.html', error='ユーザーIDまたはパスワードが正しくありません。')
-
-    return render_template('index.html')
-
-
-
-# ログアウト処理
-@app.route('/logout')
-@login_required
-def logout():
-    logout_user()
-    return redirect(url_for('login'))
-
-
-
-# ホーム画面
-@app.route('/home')
-@login_required # ログイン必須
-def home():
-    return render_template('home.html', user=current_user)
 
 
 
