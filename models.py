@@ -12,7 +12,6 @@ from flask_login import UserMixin
 # ユーザー認証モデル
 # ---------------------------------
 class Auth(db.Model, UserMixin):
-    # SQLite想定
     user_id = db.Column(db.String,db.ForeignKey('users.user_id'), primary_key=True)
     password_hash = db.Column(db.String)
     
@@ -45,8 +44,8 @@ class users(db.Model):
 # プロフモデル（すべての履歴を残す）
 # ---------------------------------
 class profile_update(db.Model):
-    update_id = db.Column(db.int, primary_key=True)
-    user_id = db.Column(db.String, db.ForeignKey('users.user_id'))
+    update_id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.String, db.ForeignKey('users.user_id',))
     username = db.Column(db.String)
     icon_path = db.Column(db.String)
     header_path = db.Column(db.String)
@@ -59,21 +58,21 @@ class profile_update(db.Model):
 # ポストモデル
 # ---------------------------------
 class posts(db.Model):
-    post_id = db.Column(db.int, primary_key=True)
+    post_id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.String, db.ForeignKey('users.user_id'))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     content = db.Column(db.String)
-    created_app = db.Column(db.String, db.CheckConstraint("created_app IN ('Echoes', 'Twitter', 'Misskey')"))
+    created_app = db.Column(db.String, db.CheckConstraint("created_app IN ('Echoes', 'Twitter', 'Misskey')", name='check_created_app'), nullable=False)
 
-    reply_to_post_id = db.Column(db.int, db.ForeignKey('posts.post_id'), nullable=True)
-    quote_of_post_id = db.Column(db.int, db.ForeignKey('posts.post_id'), nullable=True)
-    repost_of_post_id = db.Column(db.int, db.ForeignKey('posts.post_id'), nullable=True)
+    reply_to_post_id = db.Column(db.Integer, db.ForeignKey('posts.post_id'))
+    quote_of_post_id = db.Column(db.Integer, db.ForeignKey('posts.post_id'))
+    repost_of_post_id = db.Column(db.Integer, db.ForeignKey('posts.post_id'))
 
-    thread_root_post_id = db.Column(db.int, db.ForeignKey('posts.post_id'), nullable=True, index=True)
+    thread_root_post_id = db.Column(db.Integer, db.ForeignKey('posts.post_id'), index=True)
 
-    post_type = db.Column(db.String, db.CheckConstraint("post_type IN ('normal', 'reply', 'quote', 'repost')"))
+    post_type = db.Column(db.String, db.CheckConstraint("post_type IN ('normal', 'reply', 'quote', 'repost')", name='check_post_type'), nullable=False)
     content_hash = db.Column(db.String, unique=True)
 
     # 自己結合リレーション
@@ -91,10 +90,10 @@ class posts(db.Model):
 # ポスト画像モデル
 # ---------------------------------
 class post_images(db.Model):
-    image_id = db.Column(db.int, primary_key=True)
-    post_id = db.Column(db.int, db.ForeignKey('posts.post_id'), nullable=False)
+    image_id = db.Column(db.Integer, primary_key=True)
+    post_id = db.Column(db.Integer, db.ForeignKey('posts.post_id'), nullable=False)
     image_path = db.Column(db.String, nullable=False)
-    sort_order = db.Column(db.int, nullable=False)
+    sort_order = db.Column(db.Integer, nullable=False)
 
     db.UniqueConstraint('post_id', 'sort_order', name='uq_post_image_order')
 
@@ -104,7 +103,7 @@ class post_images(db.Model):
 # タグモデル
 # ---------------------------------
 class tags(db.Model):
-    tags_id = db.Column(db.int, primary_key=True)
+    tags_id = db.Column(db.Integer, primary_key=True)
     tags_name = db.Column(db.String, unique=True, nullable=False)
 
 
@@ -113,8 +112,8 @@ class tags(db.Model):
 # ポストタグモデル
 # ---------------------------------
 class post_tags(db.Model):
-    post_id = db.Column(db.int, db.ForeignKey('posts.post_id'), primary_key=True, nullable=False)
-    tags_id = db.Column(db.int, db.ForeignKey('tags.tags_id'), primary_key=True, nullable=False, index=True)
+    post_id = db.Column(db.Integer, db.ForeignKey('posts.post_id'), primary_key=True, nullable=False)
+    tags_id = db.Column(db.Integer, db.ForeignKey('tags.tags_id'), primary_key=True, nullable=False, index=True)
 
     db.UniqueConstraint('post_id', 'tags_id', name='uq_post_tags')
 
@@ -125,7 +124,7 @@ class post_tags(db.Model):
 # ---------------------------------
 class post_bookmark(db.Model):
     user_id = db.Column(db.String, db.ForeignKey('users.user_id'), primary_key=True, nullable=False)
-    post_id = db.Column(db.int, db.ForeignKey('posts.post_id'), primary_key=True, nullable=False)
+    post_id = db.Column(db.Integer, db.ForeignKey('posts.post_id'), primary_key=True, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     
