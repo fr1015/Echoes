@@ -24,7 +24,7 @@ def login():
 
     # すでにログインしている場合はホームへリダイレクト
     if current_user.is_authenticated:
-        return redirect(url_for('login_auth_bp.home'))
+        return redirect(url_for('main_bp.home'))
 
     # IDとパスワードでユーザー認証
     if request.method == 'POST':
@@ -37,7 +37,7 @@ def login():
         # ユーザー存在 + パスワード一致
         if user and check_password_hash(user.password_hash, password):
             login_user(user)  # ログイン状態にする
-            return redirect(url_for('login_auth_bp.home'))  # ログイン後ページへ
+            return redirect(url_for('main_bp.home'))  # ログイン後ページへ
         else:
             return render_template('index.html', error='ユーザーIDまたはパスワードが正しくありません。')
 
@@ -53,12 +53,6 @@ def logout():
     return redirect(url_for('login_auth_bp.login'))
 
 
-
-# ホーム画面
-@login_auth_bp.route('/home')
-@login_required # ログイン必須
-def home():
-    return render_template('home.html', user=current_user)
 
 
 
