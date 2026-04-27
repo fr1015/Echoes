@@ -78,7 +78,7 @@ function buildHeatmap() {
   if (!container) return;
   const outerW = container.parentElement.clientWidth;
 
-  const ROWS = 7, COLS = 9, gap = 4;
+  const ROWS = 5, COLS = 12, gap = 4;
   const cellSize = Math.max(8, Math.floor((outerW - gap * (COLS - 1)) / COLS));
   const totalW   = cellSize * COLS + gap * (COLS - 1);
 
