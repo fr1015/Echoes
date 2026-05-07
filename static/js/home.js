@@ -32,6 +32,11 @@ function updateModalCharCount() {
   document.getElementById("modalCharCount").textContent = `${ta.value.length} / 500`;
 }
 
+function initializeCharCounts() {
+  updateCharCount();
+  updateModalCharCount();
+}
+
 function submitModalPost() {
   const ta = document.getElementById("modalPostText");
   if (!ta.value.trim()) return;
@@ -61,6 +66,7 @@ function clearMemo() {
 window.addEventListener("load", () => {
   const saved = localStorage.getItem("memo");
   if (saved) document.getElementById("memoText").value = saved;
+  initializeCharCounts();
 });
 
 // ===== ヒートマップ =====
