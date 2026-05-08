@@ -1,42 +1,102 @@
 
 // ===== PC コンポーザー =====
+
+// 文字数カウント
 function updateCharCount() {
   const ta = document.getElementById("postText");
   document.getElementById("charCount").textContent = `${ta.value.length} / 500`;
 }
 
+// 投稿
 function submitPost() {
-  const ta = document.getElementById("postText");
-  if (!ta.value.trim()) return;
-  ta.value = "";
-  updateCharCount();
-  addHeatmapPost();
+  // 投稿内容を取得
+  const postbutton = document.getElementById("submit-btn");
+
+  // 投稿内容をサーバーに送信
+  postbutton.addEventListener("click", async () => {
+    const content = document.getElementById("postText").value;
+
+    const formData = new FormData();
+    formData.append("content", content);
+
+    // fetch API を使用して POST リクエストを送信
+    try {
+      const response = await fetch("/post/create", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await response.json();
+
+        if (data.success) {
+          // 投稿成功時の処理
+          addPostToTimeline(data.post);
+
+          // 投稿内容をクリア
+          document.getElementById("postText").value = "";
+
+        } else {
+          // 投稿失敗時の処理
+          alert("投稿に失敗しました: " + data.error);
+        }
+
+    } catch (error) {
+      console.error("Error submitting post:", error);
+    }
+})
+  // updateCharCount();
+  // addHeatmapPost();
+  window.addEventListener("DOMContentLoaded", submitPost);
 }
 
+// タイムラインに投稿を追加
+function addPostToTimeline(post) {
+  const timeline = document.getElementById("timeline");
+  const postEl = document.createElement("div");
+  postEl.classList.add("post");
+  postEl.innerHTML = `
+    <div class="post-header">
+      <span class="avatar"></span>
+      <span class="username">${post.username}</span>
+    </div>
+    <div class="post-content">
+      <p>${post.content}</p>
+    </div>
+  `;
+  timeline.prepend(postEl);
+}
+
+
 // ===== モーダル =====
+
+// モーダルを開く
 function openModal() {
   document.getElementById("postModal").classList.add("open");
   setTimeout(() => document.getElementById("modalPostText").focus(), 50);
 }
 
+// モーダルを閉じる
 function closeModal() {
   document.getElementById("postModal").classList.remove("open");
 }
 
+// モーダルのオーバーレイクリックで閉じる
 function handleModalOverlayClick(e) {
   if (e.target === document.getElementById("postModal")) closeModal();
 }
 
+// モーダルの文字数カウント
 function updateModalCharCount() {
   const ta = document.getElementById("modalPostText");
   document.getElementById("modalCharCount").textContent = `${ta.value.length} / 500`;
 }
 
+// 初期化
 function initializeCharCounts() {
   updateCharCount();
   updateModalCharCount();
 }
 
+// モーダルの投稿
 function submitModalPost() {
   const ta = document.getElementById("modalPostText");
   if (!ta.value.trim()) return;
@@ -46,11 +106,16 @@ function submitModalPost() {
   addHeatmapPost();
 }
 
+// ESC キーでモーダルを閉じる
 document.addEventListener("keydown", e => {
   if (e.key === "Escape") closeModal();
 });
 
+
+
 // ===== メモ =====
+
+// メモを保存
 function saveMemo() {
   localStorage.setItem("memo", document.getElementById("memoText").value);
   const btn = document.getElementById("saveMemoBtn");
@@ -58,27 +123,35 @@ function saveMemo() {
   setTimeout(() => btn.textContent = "保存", 1500);
 }
 
+// メモをクリア
 function clearMemo() {
   document.getElementById("memoText").value = "";
   localStorage.removeItem("memo");
 }
 
+// ページロード時にメモを復元
 window.addEventListener("load", () => {
   const saved = localStorage.getItem("memo");
   if (saved) document.getElementById("memoText").value = saved;
   initializeCharCounts();
 });
 
+
+
 // ===== ヒートマップ =====
+
 const heatmapData = {};
 const today = new Date();
 
+// 日付をキーにするための関数
 function dateKey(d) {
   return d.toISOString().split("T")[0];
 }
 
+// ヒートマップに投稿を追加（ダミーのデータ更新）
 function addHeatmapPost() { buildHeatmap(); }
 
+// ヒートマップを構築
 function buildHeatmap() {
   const container = document.getElementById("heatmapGrid");
   if (!container) return;
@@ -124,11 +197,5 @@ function buildHeatmap() {
     }
   }
 }
-
-let resizeTimer;
-window.addEventListener("resize", () => {
-  clearTimeout(resizeTimer);
-  resizeTimer = setTimeout(buildHeatmap, 80);
-});
 
 buildHeatmap();

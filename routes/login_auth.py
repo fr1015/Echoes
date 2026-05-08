@@ -1,4 +1,4 @@
-from flask import render_template, request, redirect, url_for, Blueprint
+from flask import render_template, request, redirect, url_for, Blueprint, session
 from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.security import check_password_hash
 from models import Auth
@@ -37,6 +37,7 @@ def login():
         # ユーザー存在 + パスワード一致
         if user and check_password_hash(user.password_hash, password):
             login_user(user)  # ログイン状態にする
+            session["user_id"] = user.user_id  # セッションにユーザーIDを保存
             return redirect(url_for('main_bp.home'))  # ログイン後ページへ
         else:
             return render_template('index.html', error='ユーザーIDまたはパスワードが正しくありません。')

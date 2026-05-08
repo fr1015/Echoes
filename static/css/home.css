@@ -65,7 +65,7 @@
 
 .char-count { font-size: 11px; color: var(--text-muted); font-family: 'DM Mono', monospace; }
 
-.submit-btn {
+#submit-btn, #modalSubmitBtn {
     padding: 9px 22px;
     background: var(--accent); color: white;
     border: none; border-radius: 8px;
@@ -74,7 +74,7 @@
     cursor: pointer; transition: background 0.15s;
 }
 
-.submit-btn:hover { background: var(--accent-hover); }
+#submit-btn:hover, #modalSubmitBtn:hover { background: var(--accent-hover); }
 
 /* ===== TL空状態 ===== */
 .tl-empty {

@@ -16,6 +16,7 @@ import os
 from models import db, Auth
 from routes.login_auth import login_auth_bp
 from routes.main import main_bp
+from routes.crud import crud_bp
 
 
 # ==================================================================================================
@@ -58,7 +59,7 @@ def create_app():
     # ブループリントの登録
     app.register_blueprint(login_auth_bp)
     app.register_blueprint(main_bp)
-
+    app.register_blueprint(crud_bp)
 
     return app
 
@@ -67,7 +68,7 @@ app = create_app()
 
 
 # =================================================================================================
-
+print(app.url_map)
 
 
 if __name__ == '__main__':
