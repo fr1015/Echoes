@@ -169,7 +169,7 @@ async function submitPost() {
 }
 
 // タイムラインに投稿を追加
-function addPostToTimeline(post) {
+function addPostToTimeline(post,prepend = false) {
   
   const timeline = document.getElementById("timeline");
   const postEl = document.createElement("article");
@@ -187,7 +187,18 @@ function addPostToTimeline(post) {
     </div>
   </article>
   `;
-  timeline.prepend(postEl);
+  // 追加位置を切り替える
+  if (prepend) {
+
+    // 新規投稿
+    timeline.prepend(postEl);
+
+  } else {
+
+    // 無限スクロール
+    timeline.appendChild(postEl);
+
+  }
 }
 
 
