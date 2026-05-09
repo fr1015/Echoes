@@ -7,62 +7,229 @@ function updateCharCount() {
   document.getElementById("charCount").textContent = `${ta.value.length} / 500`;
 }
 
-// 投稿
-function submitPost() {
-  // 投稿内容を取得
-  const postbutton = document.getElementById("submit-btn");
 
-  // 投稿内容をサーバーに送信
-  postbutton.addEventListener("click", async () => {
+
+// ===== 状態管理 =====
+
+// 現在読み込み中かどうか
+// 二重通信防止に使う
+let isLoading = false;
+
+// まだ追加投稿が存在するか
+// 最後まで読み切ったらfalseにする
+let hasMore = true;
+
+// 最後に表示した投稿日時
+// 次回API取得時の基準になる
+let lastCreatedAt = null;
+let lastPostId = null;
+
+
+// ===== 初期化 =====
+
+document.addEventListener("DOMContentLoaded", () => {
+
+  // 初回投稿取得
+  loadPosts();
+
+  // 無限スクロール監視開始
+  setupInfiniteScroll();
+
+});
+
+
+
+// ===== 投稿 =====
+// 投稿ボタン
+const postbutton = document.getElementById("submit-btn");
+
+// 二重送信防止フラグ
+let isPosting = false;
+
+// クリックイベントは1回だけ登録
+postbutton.addEventListener("click", submitPost);
+
+
+
+// ===== 投稿取得 =====
+async function loadPosts() {
+  console.log("loadPosts called");
+  // 二重通信防止
+  if (isLoading || !hasMore) {
+    return;
+  }
+  isLoading = true;
+
+  // ローディング表示
+  showLoading(true);
+  try {
+    // API URL
+    let url = "/posts";
+    if (lastCreatedAt) {
+      url += "?last_created_at=" + encodeURIComponent(lastCreatedAt) + "&last_post_id=" + encodeURIComponent(lastPostId);
+    }
+    console.log("fetch URL:", url);
+
+    // API通信
+    const response = await fetch(url);
+
+    // HTTPエラー
+    if (!response.ok) {
+      throw new Error(`投稿取得失敗: ${response.status}`);
+    }
+    
+    // JSON変換
+    const data = await response.json();
+    // 投稿0件なら終わる
+    if (data.length === 0) {
+      showEndMessage();
+      return;
+    }
+
+    // タイムラインに追加
+    data.forEach(post => addPostToTimeline(post));
+
+    // 最後の投稿日時を更新
+    const lastPost = data[data.length - 1];
+    lastCreatedAt = lastPost.created_at;
+    lastPostId = lastPost.post_id;
+  }
+  
+  catch (error) {
+    console.error("Error loading posts:", error);
+  }
+   
+  finally {
+    isLoading = false;
+    showLoading(false);
+  }
+}
+
+
+
+// 投稿処理
+async function submitPost() {
+  // 二重送信防止
+  if (isPosting) {
+    return;
+  }
+  isPosting = true;
+
+  // ボタン無効化
+  postbutton.disabled = true;
+  try {
+    // 投稿内容を取得
     const content = document.getElementById("postText").value;
 
+    // 空投稿防止
+    if (!content.trim()) {
+      alert("投稿内容を入力してください");
+      return;
+    }
+
+    // FormData作成
     const formData = new FormData();
     formData.append("content", content);
 
-    // fetch API を使用して POST リクエストを送信
-    try {
-      const response = await fetch("/post/create", {
-        method: "POST",
-        body: formData,
-      });
-      const data = await response.json();
+    // POSTリクエスト送信
+    const response = await fetch("/post/create", {
+      method: "POST",
+      body: formData,
+    });
 
-        if (data.success) {
-          // 投稿成功時の処理
-          addPostToTimeline(data.post);
+    // JSON変換
+    const data = await response.json();
 
-          // 投稿内容をクリア
-          document.getElementById("postText").value = "";
+    // 投稿成功
+    if (data.success) {
+      // TLへ追加
+      addPostToTimeline(data.post);
+      // 入力欄クリア
+      document.getElementById("postText").value = "";
 
-        } else {
-          // 投稿失敗時の処理
-          alert("投稿に失敗しました: " + data.error);
-        }
-
-    } catch (error) {
-      console.error("Error submitting post:", error);
+    } else {
+      // 投稿失敗
+      alert("投稿に失敗しました: " + data.error);
     }
-})
-  // updateCharCount();
-  // addHeatmapPost();
-  window.addEventListener("DOMContentLoaded", submitPost);
+
+  } catch (error) {
+    console.error("Error submitting post:", error);
+    alert("通信エラーが発生しました");
+  } finally {
+
+    // フラグ解除
+    isPosting = false;
+
+    // ボタン再有効化
+    postbutton.disabled = false;
+
+  }
+  // 文字数カウント更新
+  updateCharCount();
 }
 
 // タイムラインに投稿を追加
 function addPostToTimeline(post) {
+  
   const timeline = document.getElementById("timeline");
-  const postEl = document.createElement("div");
-  postEl.classList.add("post");
+  const postEl = document.createElement("article");
+  postEl.classList.add("tl-card");
   postEl.innerHTML = `
+  <article class="tl-card">
     <div class="post-header">
       <span class="avatar"></span>
       <span class="username">${post.username}</span>
+      <span class="userid">@${post.user_id}</span>
+      <span class="post-time">${post.created_at}</span>
     </div>
     <div class="post-content">
       <p>${post.content}</p>
     </div>
+  </article>
   `;
-  timeline.prepend(postEl);
+  timeline.appendChild(postEl);
+}
+
+
+
+// 無限スクロール
+
+function setupInfiniteScroll() {
+  const trigger = document.getElementById("loading-trigger");
+  console.log(trigger);
+  const observer = new IntersectionObserver((entries) => {
+    // triggerが画面内に入った
+    if (entries[0].isIntersecting) {
+      loadPosts();
+    }
+  }, {
+    // 少し早めに読み込む
+    rootMargin: "300px"
+  });
+  observer.observe(trigger);
+}
+
+
+
+// ローディング表示
+function showLoading(show) {
+  const loading =
+    document.getElementById("loading-indicator");
+
+  loading.style.display =
+    show ? "block" : "none";
+
+}
+
+
+// 最後まで読み込んだ表示
+
+function showEndMessage() {
+  const loading =
+    document.getElementById("loading-indicator");
+
+  loading.innerText =
+    "これ以上投稿はありません";
 }
 
 

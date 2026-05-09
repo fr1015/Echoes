@@ -81,10 +81,28 @@
   </div>
 
   <div id="timeline">
-    <div class="tl-empty">
-      <div class="tl-empty-text">まだ投稿はありません</div>
+  <!-- {% for post in posts %}
+  <article class="tl-card">
+    <div class="post-header">
+      <span class="avatar"></span>
+      <span class="username">{{ post.user.username }}</span>
+      <span class="userid">@{{ post.user.user_id }}</span>
+      <span class="post-time">{{ post.created_at }}</span>
     </div>
+    <div class="post-content">
+      <p>{{ post.content }}</p>
+    </div>
+  </article>
+  {% endfor %} -->
   </div>
+  <!-- ローディング表示 -->
+  <div id="loading-indicator">
+    Loading...
+  </div>
+
+  <!-- 無限スクロール検知用 -->
+  <div id="loading-trigger"></div>
+
 </main>
 
 <!-- ===== 右サイドバー ===== -->

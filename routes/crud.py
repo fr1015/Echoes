@@ -105,7 +105,9 @@ def create_post():
                 "post_type": new_post.post_type,
                 "reply_to_post_id": new_post.reply_to_post_id,
                 "quote_of_post_id": new_post.quote_of_post_id,
-                "repost_of_post_id": new_post.repost_of_post_id
+                "repost_of_post_id": new_post.repost_of_post_id,
+                "user_id": new_post.user_id,
+                "username": new_post.user.username
             }
         })
     except Exception as e:
