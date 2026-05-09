@@ -187,7 +187,7 @@ function addPostToTimeline(post) {
     </div>
   </article>
   `;
-  timeline.appendChild(postEl);
+  timeline.prepend(postEl);
 }
 
 
