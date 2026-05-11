@@ -1,4 +1,3 @@
-
 // ===== PC コンポーザー =====
 
 // 文字数カウント
@@ -143,7 +142,7 @@ async function submitPost() {
     // 投稿成功
     if (data.success) {
       // TLへ追加
-      addPostToTimeline(data.post);
+      addPostToTimeline(data.post, true);
       // 入力欄クリア
       document.getElementById("postText").value = "";
 
@@ -199,6 +198,7 @@ function addPostToTimeline(post,prepend = false) {
     timeline.appendChild(postEl);
 
   }
+  prepend = false;
 }
 
 
@@ -275,9 +275,20 @@ function initializeCharCounts() {
 }
 
 // モーダルの投稿
-function submitModalPost() {
+async function submitModalPost() {
   const ta = document.getElementById("modalPostText");
   if (!ta.value.trim()) return;
+  
+  // 値を一時保存
+  const content = ta.value;
+  
+  // PC側のテキストエリアに一時的に設定
+  document.getElementById("postText").value = content;
+  
+  // submitPost()を実行
+  await submitPost();
+  
+  // モーダル側をクリア
   ta.value = "";
   updateModalCharCount();
   closeModal();
