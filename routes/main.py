@@ -5,6 +5,7 @@ from models import db, posts
 from routes.login_auth import login_auth_bp
 from routes.crud import create_post
 from datetime import datetime
+from sqlalchemy import text
 
 main_bp = Blueprint('main_bp', __name__)
 
@@ -80,4 +81,27 @@ def get_posts():
 
 
 
+# ヒートマップ用API
+# 日ごとの投稿数を返す
+@main_bp.route("/heatmap")
+def get_heatmap():
+    # created_at を日単位に丸めて集計
+    # DATE(created_at) によって
+    # "2026-05-11" の形式になる
+    rows = db.session.execute(text("""
+        SELECT
+            DATE(created_at) AS post_date,
+            COUNT(*) AS post_count
+        FROM posts
+        GROUP BY DATE(created_at)
+    """))
+
+    # JSで扱いやすい辞書形式に変換
+    heatmap_data = {
+    row._mapping["post_date"]: row._mapping["post_count"]
+    for row in rows
+    }
+
+    # JSONとして返却
+    return jsonify(heatmap_data)
 

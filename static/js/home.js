@@ -368,16 +368,59 @@ window.addEventListener("load", () => {
 
 // ===== ヒートマップ =====
 
-const heatmapData = {};
+let heatmapData = {};
 const today = new Date();
+// 時刻ズレ防止
+today.setHours(0, 0, 0, 0);
 
 // 日付をキーにするための関数
 function dateKey(d) {
-  return d.toISOString().split("T")[0];
+
+  const yyyy = d.getFullYear();
+
+  const mm = String(d.getMonth() + 1)
+    .padStart(2, "0");
+
+  const dd = String(d.getDate())
+    .padStart(2, "0");
+
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+// 投稿数から色レベルを決定
+function getHeatmapLevel(count) {
+  // 投稿なし
+  if (count === 0) {
+    return 0;
+  }
+  // 1～10件
+  if (count <= 10) {
+    return 1;
+  }
+  // 11～29件
+  if (count <= 29) {
+    return 2;
+  }
+  // 30～49件
+  if (count <= 49) {
+    return 3;
+  }
+  // 50件以上
+  return 4;
 }
 
 // ヒートマップに投稿を追加（ダミーのデータ更新）
 function addHeatmapPost() { buildHeatmap(); }
+
+// APIからヒートマップデータ取得
+async function loadHeatmapData() {
+
+  const response = await fetch("/heatmap");
+
+  heatmapData = await response.json();
+
+  buildHeatmap();
+}
 
 // ヒートマップを構築
 function buildHeatmap() {
@@ -385,29 +428,37 @@ function buildHeatmap() {
   if (!container) return;
   const outerW = container.parentElement.clientWidth;
 
-  const ROWS = 5, COLS = 12, gap = 4;
+  // 7行12列で最大84日分表示。セルサイズは8px以上で自動調整。
+  const ROWS = 7, COLS = 12, gap = 4;
   const cellSize = Math.max(8, Math.floor((outerW - gap * (COLS - 1)) / COLS));
   const totalW   = cellSize * COLS + gap * (COLS - 1);
+  const totalWeeks = COLS;
 
+  // グリッド設定
   container.style.gridTemplateColumns = `repeat(${COLS}, ${cellSize}px)`;
   container.style.gridTemplateRows    = `repeat(${ROWS}, ${cellSize}px)`;
   container.style.gap   = gap + "px";
   container.style.width = totalW + "px";
   container.innerHTML   = "";
 
+  // 日付範囲の計算
   const totalDays = COLS * ROWS;
   const startDate = new Date(today);
-  startDate.setDate(startDate.getDate() - (totalDays - 1));
+  startDate.setDate(startDate.getDate() - startDate.getDay());
+  startDate.setDate(startDate.getDate() - ((totalWeeks - 1) * 7));
 
+  // 日付範囲表示
   const fmt = d =>
     `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
   const rangeEl = document.getElementById("heatmapRange");
   if (rangeEl) rangeEl.textContent = `${fmt(startDate)} ～ ${fmt(today)}`;
 
+  // グリッド生成
   for (let col = 0; col < COLS; col++) {
     for (let row = 0; row < ROWS; row++) {
       const d = new Date(startDate);
       d.setDate(d.getDate() + col * ROWS + row);
+      d.setHours(0, 0, 0, 0);
 
       const cell = document.createElement("div");
       cell.style.gridColumn = col + 1;
@@ -418,12 +469,27 @@ function buildHeatmap() {
       if (d > today) { container.appendChild(cell); continue; }
 
       const k = dateKey(d);
-      const level = heatmapData[k] || 0;
-      cell.className = "heatmap-cell";
-      cell.innerHTML = `<span class="tooltip">${k}: ${level}件</span>`;
+      // 投稿数取得
+      const count = heatmapData[k] || 0;
+
+      // 色レベル決定
+      const level = getHeatmapLevel(count);
+
+      // CSSクラス付与
+      cell.className = `heatmap-cell level-${level}`;
+
+      // tooltip
+      cell.innerHTML = `
+        <span class="tooltip">
+          ${k}<br>
+          ${count}件
+        </span>
+      `;
       container.appendChild(cell);
     }
   }
 }
 
-buildHeatmap();
+loadHeatmapData();
+
+

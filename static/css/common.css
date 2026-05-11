@@ -12,10 +12,11 @@
     --accent-hover:  #509500;
     --accent-light:  #eef5e0;
     --accent-muted:  #bdd98a;
-    --weed1:         #a3eba3;
-    --weed2:         #44da58;
-    --weed3:         #24aa34;
-    --weed4:         #056a2c;
+    --weed0:         #ebedf0;
+    --weed1:         #adfdc1;
+    --weed2:         #44da6f;
+    --weed3:         #24aa60;
+    --weed4:         #056a48;
 
     /* サイドバー幅 */
     --left-w:  280px;   /* 左サイドバー（画面左端から） */
@@ -189,7 +190,7 @@ html, body {
     margin-bottom: 10px; margin-top: -6px;
 }
 
-.heatmap-outer { width: 100%; overflow: hidden; }
+.heatmap-outer { width: 100%; overflow: visible; }
 .heatmap-grid  { display: grid; }
 
 .heatmap-cell {
@@ -214,6 +215,12 @@ html, body {
 }
 
 .heatmap-cell:hover .tooltip { opacity: 1; }
+
+.level-0 {background : var(--weed0);}
+.level-1 {background: var(--weed1);}
+.level-2 {background: var(--weed2);}
+.level-3 {background: var(--weed3);}
+.level-4 {background: var(--weed4);}
 
 /* ===== メモ ===== */
 .memo-textarea {
