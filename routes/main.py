@@ -70,7 +70,7 @@ def get_posts():
         {
             "post_id": post.post_id,
             "content": post.content,
-            "created_at": post.created_at.isoformat(), 
+            "created_at": post.created_at.isoformat() + "Z", 
             "user_id": post.user_id,
             "username": post.user.username
         }

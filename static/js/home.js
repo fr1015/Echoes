@@ -179,7 +179,7 @@ function addPostToTimeline(post,prepend = false) {
       <span class="avatar"></span>
       <span class="username">${post.username}</span>
       <span class="userid">@${post.user_id}</span>
-      <span class="post-time">${post.created_at}</span>
+      <span class="post-time">${formatRelativeTime(post.created_at)}</span>
     </div>
     <div class="post-content">
       <p>${post.content}</p>
@@ -242,6 +242,45 @@ function showEndMessage() {
   loading.innerText =
     "これ以上投稿はありません";
 }
+
+
+
+function formatRelativeTime(dateString) {
+  const now = new Date();
+  const postDate = new Date(dateString);
+
+  const diffMs = now - postDate;
+  const diffMinutes = Math.floor(diffMs / 1000 / 60);
+  const diffHours = Math.floor(diffMinutes / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  // 1分未満
+  if (diffMinutes < 1) {
+    return "たった今";
+  }
+
+  // 60分未満
+  if (diffMinutes < 60) {
+    return `${diffMinutes}分前`;
+  }
+
+  // 24時間未満
+  if (diffHours < 24) {
+    return `${diffHours}時間前`;
+  }
+
+  // 7日未満
+  if (diffDays < 7) {
+    return `${diffDays}日前`;
+  }
+
+  // それ以上
+  return postDate.toLocaleDateString("ja-JP", {
+    month: "numeric",
+    day: "numeric"
+  });
+}
+
 
 
 // ===== モーダル =====
