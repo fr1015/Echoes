@@ -1,0 +1,445 @@
+
+/* =============================================
+    postlog 固有部分のみ
+============================================= */
+
+.main {
+    margin-left: var(--left-w);
+    margin-right: var(--right-w);
+    min-height: 100vh;
+    background: var(--bg);
+    border-right: 1px solid var(--border);
+    padding: 0 20px;
+}
+
+.main-header {
+    position: sticky;
+    top: 0;
+    background: rgba(244,245,240,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 44px;
+    z-index: 40;
+    margin: 0 -20px;
+}
+
+.main-header h1 {
+    font-size: 17px;
+    font-weight: 700;
+}
+
+/* ===== カレンダー ===== */
+
+.calendar-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.cal-select {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 7px 10px;
+    padding-right: 28px;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 13px;
+    color: var(--text-primary);
+    background: var(--bg);
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.15s;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239aa38a' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+}
+
+.cal-select:focus {
+    border-color: var(--accent-muted);
+    background-color: white;
+}
+
+.calendar-grid {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.calendar-grid th {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-align: center;
+    padding: 4px 0;
+    width: calc(100% / 7);
+}
+
+.calendar-grid td {
+    text-align: center;
+    padding: 3px 0;
+}
+
+.cal-day {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    color: var(--text-primary);
+    text-decoration: none;
+    font-family: 'DM Mono', monospace;
+    position: relative;
+}
+
+.cal-day:hover {
+    background: var(--accent-light);
+    color: var(--accent);
+}
+
+.cal-day.today {
+    background: var(--accent);
+    color: white;
+    font-weight: 700;
+}
+
+.cal-day.today:hover {
+    background: var(--accent-hover);
+}
+
+.cal-day.other-month {
+    color: var(--text-muted);
+}
+
+.cal-day[data-level="1"] {
+    background: var(--weed1);
+}
+
+.cal-day[data-level="2"] {
+    background: var(--weed2);
+}
+
+.cal-day[data-level="3"] {
+    background: var(--weed3);
+    color: white;
+}
+
+.cal-day[data-level="4"] {
+    background: var(--weed4);
+    color: white;
+}
+
+.cal-legend {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 10px;
+    justify-content: flex-end;
+}
+
+.cal-legend span {
+    font-size: 10px;
+    color: var(--text-muted);
+}
+
+.legend-cell {
+    width: 11px;
+    height: 11px;
+    border-radius: 2px;
+    flex-shrink: 0;
+}
+
+/* ===== 検索 ===== */
+
+.search-box {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.search-input {
+    flex: 1;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 13px;
+    color: var(--text-primary);
+    background: var(--bg);
+    outline: none;
+}
+
+.search-input:focus {
+    border-color: var(--accent-muted);
+    background: white;
+}
+
+.search-btn {
+    padding: 8px 14px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.search-hint {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 6px;
+    line-height: 1.5;
+}
+
+/* ===== 統計 ===== */
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border-light);
+    font-size: 13px;
+}
+
+.stat-row:last-child {
+    border-bottom: none;
+}
+
+.stat-label {
+    color: var(--text-secondary);
+}
+
+.stat-value {
+    font-family: 'DM Mono', monospace;
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--text-primary);
+}
+
+.stat-unit {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-left: 2px;
+}
+
+/* ===== ポストログ ===== */
+
+.date-heading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 24px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 57px;
+    z-index: 30;
+}
+
+.date-heading-text {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    font-family: 'DM Mono', monospace;
+}
+
+.date-count {
+    font-size: 11px;
+    color: var(--text-muted);
+    background: var(--border-light);
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+.tl-card {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border-light);
+    cursor: pointer;
+    transition: background 0.1s;
+}
+
+.tl-card:hover {
+    background: var(--surface-hover);
+}
+
+.post-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 24px 5px 24px;
+}
+
+.post-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-muted), var(--accent));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    color: white;
+    flex-shrink: 0;
+}
+
+.post-meta {
+    flex: 1;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.post-username {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.post-userid {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-family: 'DM Mono', monospace;
+}
+
+.post-time {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-left: auto;
+    white-space: nowrap;
+    font-family: 'DM Mono', monospace;
+}
+
+.post-content {
+    padding: 0 24px 12px calc(24px + 36px + 10px);
+}
+
+.post-content p {
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--text-primary);
+    word-break: break-word;
+    margin: 0;
+}
+
+.log-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 24px;
+    color: var(--text-muted);
+    gap: 10px;
+}
+
+.log-empty-icon {
+    font-size: 36px;
+    opacity: 0.35;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    padding: 24px;
+}
+
+.page-btn {
+    padding: 7px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-secondary);
+    font-size: 13px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.page-btn.active {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+    font-weight: 700;
+}
+
+.random-jump-wrap {
+    padding: 24px;
+    display: flex;
+    justify-content: center;
+}
+
+.random-jump-btn {
+    padding: 12px 28px;
+    border: 2px dashed var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+    color: var(--text-secondary);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* ===== SP ===== */
+
+.sp-cal-section {
+    display: none;
+}
+
+.sp-search {
+    display: none;
+}
+
+@media (max-width: 768px) {
+
+    .main {
+    margin-left: 0;
+    margin-right: 0;
+    padding: 0;
+    padding-bottom: var(--bottombar-h);
+    }
+
+    .main-header {
+    padding: 14px 16px;
+    margin: 0;
+    }
+
+    .sp-cal-section {
+    display: block;
+    }
+
+    .sp-cal-body {
+    padding: 16px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    }
+
+    .sp-search {
+    display: flex;
+    gap: 8px;
+    padding: 12px 16px;
+    background: var(--surface);
+    border-bottom: 8px solid var(--border-light);
+    }
+
+    .date-heading {
+    padding: 10px 16px;
+    top: 49px;
+    }
+
+    .post-header {
+    padding: 12px 16px 4px 16px;
+    }
+
+    .post-content {
+    padding: 0 16px 10px calc(16px + 36px + 10px);
+    }
+}

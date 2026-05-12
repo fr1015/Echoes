@@ -62,7 +62,7 @@ async function loadPosts() {
   showLoading(true);
   try {
     // API URL
-    let url = "/posts";
+    let url = "/api/posts";
     if (lastCreatedAt) {
       url += "?last_created_at=" + encodeURIComponent(lastCreatedAt) + "&last_post_id=" + encodeURIComponent(lastPostId);
     }

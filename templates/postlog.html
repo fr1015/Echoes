@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ポストログ | Echoes</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="../static/css/all.min.css">
+  <link rel="stylesheet" href="../static/css/reset.css">
+  <link rel="stylesheet" href="../static/css/common.css">
+  <link rel="stylesheet" href="../static/css/postlog.css">
+</head>
+
+<body>
+
+<!-- ===== 左サイドバー ===== -->
+<aside class="sidebar-left">
+  <a class="logo" href="#">
+    <div class="logo-icon"></div>
+    <span class="logo-text">Echoes</span>
+  </a>
+
+  <a class="nav-item" href="/home">
+    <span class="icon"><i class="fa-regular fa-house"></i></span>
+    <span class="nav-label"> タイムライン</span>
+  </a>
+
+  <a class="nav-item active" href="/postlog">
+    <span class="icon"><i class="fa-regular fa-file-lines"></i></span>
+    <span class="nav-label"> ポストログ</span>
+  </a>
+
+  <a class="nav-item" href="#">
+    <span class="icon"><i class="fa-regular fa-folder"></i></span>
+    <span class="nav-label"> ドライブ</span>
+  </a>
+
+  <div class="sidebar-spacer"></div>
+
+  <a class="user-info" href="#profile">
+    <span class="avatar nav-item"></span>
+    <div>
+      <div class="user-name">{{user.name}}</div>
+      <div class="user-handle">@{{user.user_id}}</div>
+    </div>
+  </a>
+</aside>
+
+<!-- ===== メイン ===== -->
+<main class="main">
+
+  <div class="main-header">
+    <h1>ポストログ</h1>
+  </div>
+
+  <div class="sp-cal-section">
+    <div class="sp-cal-body">
+
+      <div class="calendar-nav">
+        <select class="cal-select" id="spCalSelect" onchange="selectMonth('sp')"></select>
+      </div>
+
+      <table class="calendar-grid">
+        <thead>
+          <tr>
+            <th>日</th><th>月</th><th>火</th><th>水</th>
+            <th>木</th><th>金</th><th>土</th>
+          </tr>
+        </thead>
+        <tbody id="spCalBody_grid"></tbody>
+      </table>
+
+      <div class="cal-legend">
+        <span>少</span>
+        <div class="legend-cell" style="background:var(--weed0)"></div>
+        <div class="legend-cell" style="background:var(--weed1)"></div>
+        <div class="legend-cell" style="background:var(--weed2)"></div>
+        <div class="legend-cell" style="background:var(--weed3)"></div>
+        <div class="legend-cell" style="background:var(--weed4)"></div>
+        <span>多</span>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="sp-search">
+    <input class="search-input" type="text" placeholder="キーワードで検索..." id="spSearchInput">
+    <button class="search-btn" onclick="doSearch('sp')">検索</button>
+  </div>
+
+  <div id="postLog"></div>
+
+  <div class="pagination" id="pagination"></div>
+
+  <div class="random-jump-wrap">
+    <button class="random-jump-btn" onclick="jumpToRandom()">
+      🎲 ランダムな日付へ
+    </button>
+  </div>
+
+</main>
+
+<!-- ===== 右サイドバー ===== -->
+<aside class="sidebar-right">
+
+  <div class="widget">
+    <div class="widget-title">カレンダー</div>
+
+    <div class="calendar-nav">
+      <select class="cal-select" id="pcCalSelect" onchange="selectMonth('pc')"></select>
+    </div>
+
+    <table class="calendar-grid">
+      <thead>
+        <tr>
+          <th>日</th><th>月</th><th>火</th><th>水</th>
+          <th>木</th><th>金</th><th>土</th>
+        </tr>
+      </thead>
+      <tbody id="pcCalBody"></tbody>
+    </table>
+
+    <div class="cal-legend">
+      <span>少</span>
+      <div class="legend-cell" style="background:var(--weed0)"></div>
+      <div class="legend-cell" style="background:var(--weed1)"></div>
+      <div class="legend-cell" style="background:var(--weed2)"></div>
+      <div class="legend-cell" style="background:var(--weed3)"></div>
+      <div class="legend-cell" style="background:var(--weed4)"></div>
+      <span>多</span>
+    </div>
+  </div>
+
+  <div class="widget">
+    <div class="widget-title">キーワード検索</div>
+
+    <div class="search-box">
+      <input class="search-input" type="text" placeholder="検索ワード" id="searchInput">
+      <button class="search-btn" onclick="doSearch('pc')">🔍</button>
+    </div>
+
+    <p class="search-hint">スペース区切りでAND検索</p>
+  </div>
+
+  <div class="widget" id="statsWidget"
+       data-today="18"
+       data-month="142"
+       data-year="1204"
+       data-total="8571">
+
+    <div class="widget-title">統計</div>
+
+    <div class="stat-row">
+      <span class="stat-label">今日</span>
+      <span class="stat-value" id="statToday">—<span class="stat-unit">件</span></span>
+    </div>
+
+    <div class="stat-row">
+      <span class="stat-label">今月</span>
+      <span class="stat-value" id="statMonth">—<span class="stat-unit">件</span></span>
+    </div>
+
+    <div class="stat-row">
+      <span class="stat-label">今年</span>
+      <span class="stat-value" id="statYear">—<span class="stat-unit">件</span></span>
+    </div>
+
+    <div class="stat-row">
+      <span class="stat-label">累計</span>
+      <span class="stat-value" id="statTotal">—<span class="stat-unit">件</span></span>
+    </div>
+
+  </div>
+
+</aside>
+
+<!-- ===== ボトムナビ ===== -->
+<nav class="bottom-nav">
+
+  <a class="bottom-nav-item" href="#">
+    <span class="bn-icon"><i class="fa-regular fa-house"></i></span>
+    <span>TL</span>
+  </a>
+
+  <a class="bottom-nav-item active" href="#">
+    <span class="bn-icon"><i class="fa-regular fa-file-lines"></i></span>
+    <span>ログ</span>
+  </a>
+
+  <a class="bottom-nav-item" href="#">
+    <span class="bn-icon"><i class="fa-regular fa-folder"></i></span>
+    <span>ドライブ</span>
+  </a>
+
+  <a class="bottom-nav-item" href="#profile">
+    <span class="bn-icon"><i class="fa-regular fa-user"></i></span>
+    <span>プロフィール</span>
+  </a>
+
+</nav>
+
+<script src="../static/js/postlog.js"></script>
+</body>
+</html>

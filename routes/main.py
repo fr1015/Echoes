@@ -27,17 +27,13 @@ def home():
     return render_template("home.html", user=user)
     
 
-@main_bp.route('/posts')
+@main_bp.route('/api/posts')
 @login_required # ログイン必須
 def get_posts():
     query = posts.query
 
     last_created_at = request.args.get("last_created_at")
     last_post_id = request.args.get("last_post_id")
-
-    print("========")
-    print("last_created_at:", last_created_at)
-    print("last_post_id:", last_post_id)
 
     if last_created_at and last_post_id:
 
@@ -46,20 +42,14 @@ def get_posts():
         )
 
         last_post_id = int(last_post_id)
-
         query = query.filter(
-
             db.or_(
-
                 posts.created_at < last_created_at,
-
                 db.and_(
                     posts.created_at == last_created_at,
                     posts.post_id < last_post_id
                 )
-
             )
-
         )
 
     post_data = query.order_by(
