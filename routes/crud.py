@@ -101,7 +101,7 @@ def create_post():
             "post" : {
                 "post_id": new_post.post_id,
                 "content": new_post.content,
-                "created_at": new_post.created_at.isoformat(),
+                "created_at": new_post.created_at.isoformat() + "Z",
                 "post_type": new_post.post_type,
                 "reply_to_post_id": new_post.reply_to_post_id,
                 "quote_of_post_id": new_post.quote_of_post_id,

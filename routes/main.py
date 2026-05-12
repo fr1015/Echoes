@@ -4,7 +4,7 @@ from werkzeug.security import check_password_hash
 from models import db, posts
 from routes.login_auth import login_auth_bp
 from routes.crud import create_post
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy import text
 
 main_bp = Blueprint('main_bp', __name__)

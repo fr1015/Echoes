@@ -52,7 +52,6 @@ postbutton.addEventListener("click", submitPost);
 
 // ===== 投稿取得 =====
 async function loadPosts() {
-  console.log("loadPosts called");
   // 二重通信防止
   if (isLoading || !hasMore) {
     return;
@@ -67,8 +66,6 @@ async function loadPosts() {
     if (lastCreatedAt) {
       url += "?last_created_at=" + encodeURIComponent(lastCreatedAt) + "&last_post_id=" + encodeURIComponent(lastPostId);
     }
-    console.log("fetch URL:", url);
-
     // API通信
     const response = await fetch(url);
 
@@ -173,6 +170,8 @@ function addPostToTimeline(post,prepend = false) {
   const timeline = document.getElementById("timeline");
   const postEl = document.createElement("article");
   postEl.classList.add("tl-card");
+  console.log(post.created_at);
+  console.log(typeof post.created_at);
   postEl.innerHTML = `
   <article class="tl-card">
     <div class="post-header">
@@ -207,7 +206,6 @@ function addPostToTimeline(post,prepend = false) {
 
 function setupInfiniteScroll() {
   const trigger = document.getElementById("loading-trigger");
-  console.log(trigger);
   const observer = new IntersectionObserver((entries) => {
     // triggerが画面内に入った
     if (entries[0].isIntersecting) {
@@ -244,7 +242,7 @@ function showEndMessage() {
 }
 
 
-
+// 相対時間表示
 function formatRelativeTime(dateString) {
   const now = new Date();
   const postDate = new Date(dateString);
