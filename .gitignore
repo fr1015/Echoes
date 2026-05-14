@@ -5,3 +5,5 @@ db/
 *.sqlite3
 __pycache__/
 *.pyc
+import-json.py
+tweets.js
