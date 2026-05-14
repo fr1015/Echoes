@@ -40,23 +40,23 @@ body{
 }
 /* ダークモード */
 body.dark *{
-  --bg:            #23252e;   /* surface より少し暗い、ページ背景 */
-  --surface:       #2f313c;   /* カード・サイドバー面 */
-  --surface-hover: #363944;   /* ホバー時（surface より少し明るく） */
-  --border:        #454857;   /* やや見える境界線 */
-  --border-light:  #3a3d4a;   /* 薄い境界線（surface に近い） */
-  --text-primary:  #e8eae2;   /* メインテキスト（白に近い緑寄り） */
-  --text-secondary:#8fa39d;   /* サブテキスト */
-  --text-muted:    #7d8c86;   /* ミュートテキスト */
-  --accent:        #76b500;   /* アクセント色はそのまま（緑は暗背景で映える） */
-  --accent-hover:  #509500;   /* 同上 */
-  --accent-light:  #263318;   /* アクセント薄背景（暗め） */
-  --accent-muted:  #4a6b20;   /* アクセントのミュート */
-  --weed0:         #3a3d4a;   /* ヒートマップ空白（borderに近い） */
-  --weed1:         #1a5d49;
-  --weed2:         #1e8d5d;
-  --weed3:         #2dc170;   /* ライトと同じでも見やすい */
-  --weed4:         #54e97e;   /* 暗背景では明るめが映える（ライトと逆順） */
+    --bg:            #23252e;   
+    --surface:       #2f313c;   
+    --surface-hover: #363944;   
+    --border:        #454857;   
+    --border-light:  #3a3d4a;   
+    --text-primary:  #e8eae2;   
+    --text-secondary:#8fa39d;   
+    --text-muted:    #7d8c86;   
+    --accent:        #76b500;   
+    --accent-hover:  #509500;   
+    --accent-light:  #263318;   
+    --accent-muted:  #4a6b20;   
+    --weed0:         #3a3d4a;   
+    --weed1:         #1a5d49;
+    --weed2:         #1e8d5d;
+    --weed3:         #2dc170;   
+    --weed4:         #54e97e;   
 }
 
 
