@@ -38,7 +38,7 @@ def get_posts():
     if last_created_at and last_post_id:
 
         last_created_at = datetime.fromisoformat(
-            last_created_at
+            last_created_at.replace("Z", "+00:00")
         )
 
         last_post_id = int(last_post_id)
