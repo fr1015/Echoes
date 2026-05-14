@@ -75,6 +75,9 @@ class posts(db.Model):
     post_type = db.Column(db.String, db.CheckConstraint("post_type IN ('normal', 'reply', 'quote', 'repost')", name='check_post_type'), nullable=False)
     content_hash = db.Column(db.String, unique=True)
 
+    source_post_id = db.Column(db.String)
+    source_post_url = db.Column(db.String)
+
     # 自己結合リレーション
     reply_to_post = db.relationship('posts', remote_side=[post_id], foreign_keys=[reply_to_post_id], backref='replies')
     quote_of_post = db.relationship('posts', remote_side=[post_id], foreign_keys=[quote_of_post_id], backref='quotes')
