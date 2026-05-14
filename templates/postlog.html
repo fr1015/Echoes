@@ -125,7 +125,7 @@
     {% endif %}
   </div>
 
-  <div class="pagination">
+  <div class="pagination" id="pagination">
     {% if pagination.has_prev %}
       <a href="{{ url_for('postlog_bp.postlog', page=1) }}">最初</a>
       <a href="{{ url_for('postlog_bp.postlog', page=pagination.prev_num) }}">前へ</a>
@@ -256,6 +256,9 @@
 
 </nav>
 
+<script id="postCountMap" type="application/json">
+  {{ post_count_map | tojson }}
+</script>
 <script src="../static/js/postlog.js"></script>
 </body>
 </html>
