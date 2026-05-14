@@ -1,3 +1,59 @@
+// 保存済みテーマを読み込む
+function loadTheme() {
+
+  const savedTheme = localStorage.getItem("theme");
+
+  document.body.classList.toggle(
+    "dark",
+    savedTheme === "dark"
+  );
+
+  console.log("loaded theme:", savedTheme);
+  console.log(document.body.classList);
+
+}
+
+// テーマ切替
+function toggleTheme() {
+
+  document.body.classList.toggle("dark");
+
+  // 保存
+  if (document.body.classList.contains("dark")) {
+    localStorage.setItem("theme", "dark");
+  } else {
+    localStorage.setItem("theme", "light");
+  }
+
+  console.log("clicked");
+  console.log(document.body.classList);
+  console.log(document.body.classList.contains("dark"));
+
+}
+
+// ページ読み込み後に実行
+document.addEventListener("DOMContentLoaded", () => {
+
+  console.log("DOMContentLoaded");
+
+  const toggleBtn =
+    document.getElementById("theme-toggle");
+
+  console.log(toggleBtn);
+
+  // 保存テーマ適用
+  loadTheme();
+
+  // ボタンイベント
+  toggleBtn.addEventListener(
+    "click",
+    toggleTheme
+  );
+
+});
+
+
+
 // ===== PC コンポーザー =====
 
 // 文字数カウント
@@ -27,6 +83,9 @@ let lastPostId = null;
 // ===== 初期化 =====
 
 document.addEventListener("DOMContentLoaded", () => {
+
+  // テーマを復元
+  loadTheme();
 
   // 初回投稿取得
   loadPosts();
@@ -170,8 +229,6 @@ function addPostToTimeline(post,prepend = false) {
   const timeline = document.getElementById("timeline");
   const postEl = document.createElement("article");
   postEl.classList.add("tl-card");
-  console.log(post.created_at);
-  console.log(typeof post.created_at);
   postEl.innerHTML = `
   <article class="tl-card">
     <div class="post-header">

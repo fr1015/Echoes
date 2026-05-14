@@ -15,7 +15,7 @@
 .main-header {
     position: sticky;
     top: 0;
-    background: rgba(244,245,240,0.92);
+    background: var(--surface);
     backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--border);
     padding: 16px 44px; /* 24px + 20px padding分 */
@@ -55,7 +55,7 @@
     line-height: 1.6;
 }
 
-.composer textarea:focus       { border-color: var(--accent-muted); background: white; }
+.composer textarea:focus       { border-color: var(--accent-muted); background: var(--surface); }
 .composer textarea::placeholder{ color: var(--text-muted); }
 
 .composer-footer {
