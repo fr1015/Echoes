@@ -279,6 +279,17 @@ function formatRelativeTime(dateString) {
   });
 }
 
+// 相対時間を全て更新
+function updateAllRelativeTimes() {
+  document.querySelectorAll(".post-time").forEach(el => {
+    const dateString = el.dataset.time;
+
+    el.textContent = formatRelativeTime(dateString);
+  });
+}
+// 1分ごとに相対時間を更新
+setInterval(updateAllRelativeTimes, 60000);
+
 
 
 // ===== モーダル =====
