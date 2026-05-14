@@ -5,5 +5,10 @@ db/
 *.sqlite3
 __pycache__/
 *.pyc
+<<<<<<< HEAD
 tweets.js
 import-json.py
+=======
+import-json.py
+tweets.js
+>>>>>>> 6f8eb15b0f3e82d6eb93aabd447ea19b32f54ae7
