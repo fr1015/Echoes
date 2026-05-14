@@ -1,3 +1,18 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+    font-family: 'Noto Sans JP', sans-serif;
+    color: var(--text-primary);
+    font-size: 14px;
+    /* bodyに背景色を持たせない。各領域が自分で色を持つ */
+    background: var(--bg);
+}
+body{
+      transition:
+    background-color 0.2s,
+    color 0.2s;
+}
+
 /* ===== VARIABLES ===== */
 :root {
     --bg:            #f4f5f0;
@@ -23,16 +38,27 @@
     --right-w: 360px;   /* 右サイドバー（画面右端から） */
     --bottombar-h: 60px;
 }
-
-* { margin: 0; padding: 0; box-sizing: border-box; }
-
-html, body {
-    font-family: 'Noto Sans JP', sans-serif;
-    color: var(--text-primary);
-    font-size: 14px;
-    /* bodyに背景色を持たせない。各領域が自分で色を持つ */
-    background: var(--bg);
+/* ダークモード */
+body.dark *{
+    --bg:            #23252e;   
+    --surface:       #2f313c;   
+    --surface-hover: #363944;   
+    --border:        #454857;   
+    --border-light:  #3a3d4a;   
+    --text-primary:  #e8eae2;   
+    --text-secondary:#8fa39d;   
+    --text-muted:    #7d8c86;   
+    --accent:        #76b500;   
+    --accent-hover:  #509500;   
+    --accent-light:  #263318;   
+    --accent-muted:  #4a6b20;   
+    --weed0:         #3a3d4a;   
+    --weed1:         #1a5d49;
+    --weed2:         #1e8d5d;
+    --weed3:         #2dc170;   
+    --weed4:         #54e97e;   
 }
+
 
 /* ========================================
     PC レイアウト
@@ -158,7 +184,7 @@ html, body {
     border-radius: 50%;
     background-color: var(--accent);
     display: flex; align-items: center; justify-content: center;
-    font-size: 14px; font-weight: 700; color: white;
+    font-size: 14px; font-weight: 700;;
     flex-shrink: 0;
 }
 
@@ -233,7 +259,7 @@ html, body {
     outline: none; line-height: 1.6; transition: border-color 0.15s;
 }
 
-.memo-textarea:focus { border-color: var(--accent-muted); background: white; }
+.memo-textarea:focus { border-color: var(--accent-muted); background: var(--bg); }
 .memo-actions { display: flex; gap: 8px; margin-top: 8px; }
 
 .btn-sm {
@@ -315,7 +341,7 @@ html, body {
     outline: none; transition: border-color 0.15s; line-height: 1.6;
 }
 
-.modal-composer textarea:focus       { border-color: var(--accent-muted); background: white; }
+.modal-composer textarea:focus       { border-color: var(--accent-muted); background: var(--bg); }
 .modal-composer textarea::placeholder{ color: var(--text-muted); }
 
 .modal-footer {

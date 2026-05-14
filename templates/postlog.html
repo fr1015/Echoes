@@ -43,7 +43,7 @@
   <a class="user-info" href="#profile">
     <span class="avatar nav-item"></span>
     <div>
-      <div class="user-name">{{user.name}}</div>
+      <div class="user-name">{{user.username}}</div>
       <div class="user-handle">@{{user.user_id}}</div>
     </div>
   </a>
@@ -91,7 +91,39 @@
     <button class="search-btn" onclick="doSearch('sp')">検索</button>
   </div>
 
-  <div id="postLog"></div>
+  <div id="postLog">
+    {% if posts_by_date %}
+      {% for day, day_posts in posts_by_date.items() %}
+        <div class="date-group" id="date-{{ day.strftime('%Y-%m-%d') }}">
+          <div class="date-heading">
+            <span class="date-heading-text">
+              {{ day.strftime('%Y年%#m月%#d日') }}（{{ day.strftime('%a') }}）
+            </span>
+            <span class="date-count">{{ day_posts|length }}件</span>
+          </div>
+
+          {% for post in day_posts %}
+            <article class="tl-card">
+              <div class="post-header">
+                <div class="post-avatar">{{ user.username[0] }}</div>
+                <div class="post-meta">
+                  <span class="post-username">{{ user.username }}</span>
+                  <span class="post-userid">@{{ user.user_id }}</span>
+                  <span class="post-time">{{ post.created_at.strftime('%H:%M') }}</span>
+                </div>
+              </div>
+              <div class="post-content"><p>{{ post.content }}</p></div>
+            </article>
+          {% endfor %}
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="log-empty">
+        <div class="log-empty-icon">🌱</div>
+        <div class="log-empty-text">まだ投稿はありません</div>
+      </div>
+    {% endif %}
+  </div>
 
   <div class="pagination" id="pagination"></div>
 

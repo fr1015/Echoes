@@ -1,17 +1,4 @@
-// ==========================================================
-//  データ定義
-//  [FLASK] 下記 DUMMY_* をサーバーから渡すデータで置き換える
-//
-//  方法A: data属性に JSON を埋め込む（Jinja2）
-//    <div id="postLog" data-posts='{{ grouped_posts | tojson }}'></div>
-//    → JS側で: const rawData = JSON.parse(el.dataset.posts);
-//
-//  方法B: fetch API で取得
-//    fetch('/api/post-log?page=1').then(r => r.json()).then(renderPosts)
-// ==========================================================
 
-// ダミー：投稿数マップ { "YYYY-MM-DD": 件数 }
-// [FLASK] postCountMap を {{ post_count_map | tojson }} で差し替え
 const postCountMap = {
   "2026-05-12": 5,  "2026-05-11": 12, "2026-05-10": 3,
   "2026-05-09": 0,  "2026-05-08": 8,  "2026-05-07": 18,
@@ -23,8 +10,7 @@ const postCountMap = {
   "2026-04-21": 0,  "2026-04-20": 13, "2026-04-15": 9,
 };
 
-// ダミー：ポスト一覧 { "YYYY-MM-DD": [{ time, content }, ...] }
-// [FLASK] groupedPosts を {{ grouped_posts | tojson }} で差し替え
+
 const groupedPosts = {
   "2026-05-07": [
     { time: "07:19", content: "今日は朝からコードを書いていた。だいぶ形になってきた気がする。" },
@@ -45,66 +31,66 @@ const groupedPosts = {
 const USERNAME = "kan";
 const USER_ID  = "@lifelog_kan";
 
-// ==========================================================
-//  ポスト描画
-// ==========================================================
-// 日付ラベルを「YYYY年M月D日（曜）」形式に変換
-function formatDateLabel(dateStr) {
-  const d = new Date(dateStr + "T00:00:00");
-  const week = ["日","月","火","水","木","金","土"][d.getDay()];
-  return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日（${week}）`;
-}
+// // ==========================================================
+// //  ポスト描画
+// // ==========================================================
+// // 日付ラベルを「YYYY年M月D日（曜）」形式に変換
+// function formatDateLabel(dateStr) {
+//   const d = new Date(dateStr + "T00:00:00");
+//   const week = ["日","月","火","水","木","金","土"][d.getDay()];
+//   return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日（${week}）`;
+// }
 
-// 投稿データを受け取ってHTMLに描画
-function renderPosts(data) {
-  // data: { "YYYY-MM-DD": [{ time, content }, ...], ... }
-  const container = document.getElementById("postLog");
-  container.innerHTML = "";
+// // 投稿データを受け取ってHTMLに描画
+// function renderPosts(data) {
+//   // data: { "YYYY-MM-DD": [{ time, content }, ...], ... }
+//   const container = document.getElementById("postLog");
+//   container.innerHTML = "";
 
-  const dates = Object.keys(data).sort().reverse();
+//   const dates = Object.keys(data).sort().reverse();
 
-  if (dates.length === 0) {
-    container.innerHTML = `
-      <div class="log-empty">
-        <div class="log-empty-icon">🌱</div>
-        <div class="log-empty-text">まだ投稿はありません</div>
-      </div>`;
-    return;
-  }
+//   if (dates.length === 0) {
+//     container.innerHTML = `
+//       <div class="log-empty">
+//         <div class="log-empty-icon">🌱</div>
+//         <div class="log-empty-text">まだ投稿はありません</div>
+//       </div>`;
+//     return;
+//   }
 
-  // 日付ごとにグループ化して表示
-  dates.forEach(dateStr => {
-    const posts = data[dateStr];
-    const group = document.createElement("div");
-    group.className = "date-group";
-    group.id = `date-${dateStr}`;
+//   // 日付ごとにグループ化して表示
+//   dates.forEach(dateStr => {
+//     const posts = data[dateStr];
+//     const group = document.createElement("div");
+//     group.className = "date-group";
+//     group.id = `date-${dateStr}`;
 
-    const heading = document.createElement("div");
-    heading.className = "date-heading";
-    heading.innerHTML = `
-      <span class="date-heading-text">${formatDateLabel(dateStr)}</span>
-      <span class="date-count">${posts.length}件</span>`;
-    group.appendChild(heading);
+//     const heading = document.createElement("div");
+//     heading.className = "date-heading";
+//     heading.innerHTML = `
+//       <span class="date-heading-text">${formatDateLabel(dateStr)}</span>
+//       <span class="date-count">${posts.length}件</span>`;
+//     group.appendChild(heading);
 
-    posts.forEach(post => {
-      const card = document.createElement("article");
-      card.className = "tl-card";
-      card.innerHTML = `
-        <div class="post-header">
-          <div class="post-avatar">${USERNAME[0]}</div>
-          <div class="post-meta">
-            <span class="post-username">${USERNAME}</span>
-            <span class="post-userid">${USER_ID}</span>
-            <span class="post-time">${post.time}</span>
-          </div>
-        </div>
-        <div class="post-content"><p>${post.content}</p></div>`;
-      group.appendChild(card);
-    });
+//     posts.forEach(post => {
+//       const card = document.createElement("article");
+//       card.className = "tl-card";
+//       card.innerHTML = `
+//         <div class="post-header">
+//           <div class="post-avatar">${USERNAME[0]}</div>
+//           <div class="post-meta">
+//             <span class="post-username">${USERNAME}</span>
+//             <span class="post-userid">${USER_ID}</span>
+//             <span class="post-time">${post.time}</span>
+//           </div>
+//         </div>
+//         <div class="post-content"><p>${post.content}</p></div>`;
+//       group.appendChild(card);
+//     });
 
-    container.appendChild(group);
-  });
-}
+//     container.appendChild(group);
+//   });
+// }
 
 // ページネーション（シンプル版 / Flask連携後はURLパラメータで制御）
 function renderPagination(current, total) {
@@ -275,7 +261,7 @@ function doSearch(from) {
 // ==========================================================
 //  初期化
 // ==========================================================
-renderPosts(groupedPosts);
+// renderPosts(groupedPosts);
 renderPagination(1, 12);
 renderStats();
 populateCalSelect("pcCalSelect");
