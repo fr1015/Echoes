@@ -111,50 +111,35 @@ postbutton.addEventListener("click", submitPost);
 
 // ===== 投稿取得 =====
 async function loadPosts() {
-  // 二重通信防止
-  if (isLoading || !hasMore) {
-    return;
-  }
+  if (isLoading || !hasMore) return;
   isLoading = true;
-
-  // ローディング表示
   showLoading(true);
+
   try {
-    // API URL
     let url = "/api/posts";
     if (lastCreatedAt) {
-      url += "?last_created_at=" + encodeURIComponent(lastCreatedAt) + "&last_post_id=" + encodeURIComponent(lastPostId);
+      url += "?last_created_at=" + encodeURIComponent(lastCreatedAt)
+           + "&last_post_id=" + encodeURIComponent(lastPostId);
     }
-    // API通信
-    const response = await fetch(url);
 
-    // HTTPエラー
-    if (!response.ok) {
-      throw new Error(`投稿取得失敗: ${response.status}`);
-    }
-    
-    // JSON変換
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`投稿取得失敗: ${response.status}`);
+
     const data = await response.json();
-    // 投稿0件なら終わる
     if (data.length === 0) {
       showEndMessage();
       return;
     }
 
-    // タイムラインに追加
-    data.forEach(post => addPostToTimeline(post));
+    data.forEach(post => addPostToTimeline(post, post.is_pinned));
 
-    // 最後の投稿日時を更新
     const lastPost = data[data.length - 1];
     lastCreatedAt = lastPost.created_at;
     lastPostId = lastPost.post_id;
-  }
-  
-  catch (error) {
+
+  } catch (error) {
     console.error("Error loading posts:", error);
-  }
-   
-  finally {
+  } finally {
     isLoading = false;
     showLoading(false);
   }
@@ -224,37 +209,76 @@ async function submitPost() {
 }
 
 // タイムラインに投稿を追加
-function addPostToTimeline(post,prepend = false) {
-  
+function addPostToTimeline(post, prepend = false) {
   const timeline = document.getElementById("timeline");
   const postEl = document.createElement("article");
   postEl.classList.add("tl-card");
+  if (post.is_pinned) postEl.classList.add("pinned");
+
   postEl.innerHTML = `
-  <article class="tl-card">
-    <div class="post-header">
-      <span class="avatar"></span>
-      <span class="username">${post.username}</span>
-      <span class="userid">@${post.user_id}</span>
-      <span class="post-time">${formatRelativeTime(post.created_at)}</span>
-    </div>
-    <div class="post-content">
-      <p>${post.content}</p>
-    </div>
-  </article>
+    <article class="tl-card">
+      <div class="tl-card-inner">
+        <span class="avatar"></span>
+        <div class="post-body">
+          <div class="post-header">
+            <span class="username">${post.username}</span>
+            <span class="userid">@${post.user_id}</span>
+            <span class="post-time" data-time="${post.created_at}">
+              ${formatRelativeTime(post.created_at)}
+            </span>
+          </div>
+          <div class="post-content">
+            <p>${post.content}</p>
+          </div>
+          <div class="post-actions">
+            <button class="post-action-btn" title="リプライ">
+              <i class="fa-regular fa-comment"></i>
+            </button>
+            <button class="post-action-btn" title="リポスト">
+              <i class="fa-solid fa-retweet"></i>
+            </button>
+            <button class="post-action-btn pin-btn ${post.is_pinned ? "pinned" : ""}" title="ピン留め">
+              <i class="fa-solid fa-thumbtack"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </article>
   `;
-  // 追加位置を切り替える
+
+  // ピントグル
+  const pinBtn = postEl.querySelector(".pin-btn");
+  pinBtn.addEventListener("click", async () => {
+    const wantPin = !postEl.classList.contains("pinned");
+    const res = await fetch(`/api/posts/${post.post_id}/pin`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ pin: wantPin })
+    });
+    const data = await res.json();
+    if (!data.success) return;
+
+    if (data.is_pinned) {
+      // 既存ピンを解除（1件制限）
+      const old = document.querySelector(".tl-card.pinned");
+      if (old && old !== postEl) {
+        old.classList.remove("pinned");
+        old.querySelector(".pin-btn")?.classList.remove("pinned");
+      }
+      postEl.classList.add("pinned");
+      pinBtn.classList.add("pinned");
+      timeline.prepend(postEl);
+    } else {
+      postEl.classList.remove("pinned");
+      pinBtn.classList.remove("pinned");
+    }
+  });
+
   if (prepend) {
-
-    // 新規投稿
     timeline.prepend(postEl);
-
   } else {
-
-    // 無限スクロール
     timeline.appendChild(postEl);
-
   }
-  prepend = false;
 }
 
 
@@ -347,6 +371,13 @@ function updateAllRelativeTimes() {
 // 1分ごとに相対時間を更新
 setInterval(updateAllRelativeTimes, 60000);
 
+// ピン留めのトグル
+document.querySelectorAll(".pin-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    btn.classList.toggle("pinned");
+    // [FLASK] fetch(`/api/posts/${postId}/pin`, { method: "POST" });
+  });
+});
 
 
 // ===== モーダル =====

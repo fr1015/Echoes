@@ -78,6 +78,8 @@ class posts(db.Model):
     source_post_id = db.Column(db.String)
     source_post_url = db.Column(db.String)
 
+    is_pinned = db.Column(db.Boolean, default=False, nullable=False)
+
     # 自己結合リレーション
     reply_to_post = db.relationship('posts', remote_side=[post_id], foreign_keys=[reply_to_post_id], backref='replies')
     quote_of_post = db.relationship('posts', remote_side=[post_id], foreign_keys=[quote_of_post_id], backref='quotes')
