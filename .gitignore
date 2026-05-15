@@ -5,7 +5,17 @@ db/
 *.sqlite3
 __pycache__/
 *.pyc
+<<<<<<< HEAD
 import-tw.py
 import-mi.py
 tweets.js
 notes-2026-05-14-13-43-58.json
+=======
+<<<<<<< HEAD
+tweets.js
+import-json.py
+=======
+import-json.py
+tweets.js
+>>>>>>> 6f8eb15b0f3e82d6eb93aabd447ea19b32f54ae7
+>>>>>>> e24773146b21d9434d422f93d928dacd25fb6750
