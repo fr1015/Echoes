@@ -35,12 +35,26 @@ def get_posts():
     last_created_at = request.args.get("last_created_at")
     last_post_id = request.args.get("last_post_id")
 
-    if last_created_at and last_post_id:
+    # ページング対象は常に「ピン以外」にする（重複回避）
+    query = query.filter(posts.is_pinned.is_(False))
 
+    pinned_post = None
+    # 初回だけピンを別枠で取得
+    if not last_created_at and not last_post_id:
+        pinned_post = (posts.query
+            .filter(
+                posts.user_id == current_user.user_id,
+                posts.is_pinned.is_(True)
+            )
+            .order_by(posts.created_at.desc(), posts.post_id.desc())
+            .first()
+        )
+
+    # ページングのパラメータがあれば、作成日時とIDで次のページ以降を取得する条件を追加
+    if last_created_at and last_post_id:
         last_created_at = datetime.fromisoformat(
             last_created_at.replace("Z", "+00:00")
         )
-
         last_post_id = int(last_post_id)
         query = query.filter(
             db.or_(
@@ -57,16 +71,23 @@ def get_posts():
         posts.post_id.desc()
     ).limit(15).all()
 
-    return jsonify([
-        {
+    # ピンと通常投稿を合わせてシリアライズする関数
+    def serialize(post):
+        return {
             "post_id": post.post_id,
             "content": post.content,
-            "created_at": post.created_at.isoformat() + "Z", 
+            "created_at": post.created_at.isoformat() + "Z",
             "user_id": post.user_id,
-            "username": post.user.username
+            "username": post.user.username,
+            "is_pinned": post.is_pinned
         }
-        for post in post_data
-    ])
+
+    result = []
+    if pinned_post:
+        result.append(serialize(pinned_post))
+    result.extend([serialize(p) for p in post_data])
+
+    return jsonify(result)
 
 
 
@@ -94,4 +115,43 @@ def get_heatmap():
 
     # JSONとして返却
     return jsonify(heatmap_data)
+
+# ポストピン用API
+@main_bp.route("/api/posts/<int:post_id>/pin", methods=["POST"])
+@login_required
+def toggle_pin(post_id):
+    post = (posts.query
+        .filter(
+            posts.post_id == post_id,
+            posts.user_id == current_user.user_id
+        )
+        .first_or_404()
+    )
+
+    data = request.get_json(silent=True) or {}
+    # pin が指定されていなければトグル
+    new_state = data.get("pin")
+    if new_state is None:
+        new_state = not post.is_pinned
+    new_state = bool(new_state)
+
+    if new_state:
+        # 自分の他のピンを解除（1件制限）
+        (posts.query
+            .filter(
+                posts.user_id == current_user.user_id,
+                posts.is_pinned.is_(True),
+                posts.post_id != post_id
+            )
+            .update({posts.is_pinned: False})
+        )
+
+    post.is_pinned = new_state
+    db.session.commit()
+
+    return jsonify({
+        "success": True,
+        "post_id": post_id,
+        "is_pinned": post.is_pinned
+    })
 
