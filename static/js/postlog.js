@@ -46,7 +46,7 @@ function goPage(page) {
 function renderStats() {
   const w = document.getElementById("statsWidget");
   if (!w) return;
-  const fmt = n => Number(n).toLocaleString();
+  const fmt = n => Number(n || 0).toLocaleString();
   document.getElementById("statToday").innerHTML = `${fmt(w.dataset.today)}<span class="stat-unit">件</span>`;
   document.getElementById("statMonth").innerHTML = `${fmt(w.dataset.month)}<span class="stat-unit">件</span>`;
   document.getElementById("statYear").innerHTML  = `${fmt(w.dataset.year)}<span class="stat-unit">件</span>`;
