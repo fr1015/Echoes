@@ -15,6 +15,9 @@
 .main-header {
     position: sticky;
     top: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     background: var(--surface);
     backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--border);
@@ -27,6 +30,16 @@
     font-size: 17px;
     font-weight: 700;
     color: var(--text-primary);
+}
+
+#theme-toggle {
+    margin-left: auto;
+    padding: 8px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--text-primary);
+    font-size: 16px;
 }
 
 /* ===== コンポーザー ===== */
@@ -84,6 +97,7 @@
   flex-direction: column;
 }
 
+/* ===== カード全体 ===== */
 .tl-card {
   background: var(--surface);
   border-bottom: 1px solid var(--border-light);
@@ -93,45 +107,86 @@
 
 .tl-card:hover { background: var(--surface-hover); }
 
+/* 赤＋青を横並びにする行 */
+.tl-card-inner {
+  display: flex;
+  align-items: flex-start;  /* 上端揃え */
+  gap: 12px;
+  padding: 14px 24px 8px 24px;
+}
+
+/* ===== 赤：アバター ===== */
+/* 既存の .avatar スタイルをそのまま使用 */
+
+/* ===== 青：右まとまり ===== */
+.post-body {
+  flex: 1;
+  min-width: 0;  /* テキストのはみ出し防止 */
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ===== 緑：ヘッダー行 ===== */
 .post-header {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 16px 24px 6px 24px;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
-.username {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-primary);
-}
+.username  { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+.userid    { font-size: 12px; color: var(--text-muted); font-family: 'DM Mono', monospace; }
+.post-time { font-size: 11px; color: var(--text-muted); margin-left: auto; font-family: 'DM Mono', monospace; white-space: nowrap; }
 
-.userid {
-  font-size: 12px;
-  color: var(--text-muted);
-  font-family: 'DM Mono', monospace;
-}
-
-.post-time {
-  font-size: 11px;
-  color: var(--text-muted);
-  margin-left: auto;
-  font-family: 'DM Mono', monospace;
-  white-space: nowrap;
-}
-
-.post-content {
-  /* 24px(左padding) + 40px(avatar幅) + 10px(gap) でテキストをアバター右端に揃える */
-  padding: 0 24px 14px calc(24px + 40px + 10px);
-}
-
+/* ===== 黄：本文 ===== */
 .post-content p {
   font-size: 14px;
-  line-height: 1.65;
+  line-height: 1.7;
   color: var(--text-primary);
   word-break: break-word;
   margin: 0;
-  white-space: pre-wrap;
+}
+
+/* ===== 紫：アクションバー ===== */
+.post-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 2px;
+}
+
+.post-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: none;
+  color: var(--text-muted);
+  font-size: 14px;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+}
+
+.post-action-btn:hover {
+  background: var(--border-light);
+  color: var(--accent);
+}
+
+.pin-btn { margin-left: auto; }
+.pin-btn.pinned { color: var(--accent); }
+.pin-btn.pinned:hover { color: var(--text-muted); }
+
+/* ピン留め済み状態（JS で .pinned を付け外し） */
+.pin-btn.pinned {
+  color: var(--accent);
+}
+
+.pin-btn.pinned:hover {
+  color: var(--text-muted);
 }
 
 

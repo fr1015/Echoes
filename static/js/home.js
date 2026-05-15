@@ -231,14 +231,40 @@ function addPostToTimeline(post,prepend = false) {
   postEl.classList.add("tl-card");
   postEl.innerHTML = `
   <article class="tl-card">
-    <div class="post-header">
+    <div class="tl-card-inner">
+
+      <!-- 赤：アバター（左に単独配置） -->
       <span class="avatar"></span>
-      <span class="username">${post.username}</span>
-      <span class="userid">@${post.user_id}</span>
-      <span class="post-time">${formatRelativeTime(post.created_at)}</span>
-    </div>
-    <div class="post-content">
-      <p>${post.content}</p>
+
+      <!-- 青：右側のまとまり -->
+      <div class="post-body">
+
+        <!-- 緑：username / userid / time -->
+        <div class="post-header">
+          <span class="username">${post.username}</span>
+          <span class="userid">@${post.user_id}</span>
+          <span class="post-time">${formatRelativeTime(post.created_at)}</span>
+        </div>
+
+        <!-- 黄：本文 -->
+        <div class="post-content">
+          <p>${post.content}</p>
+        </div>
+
+        <!-- 紫：アクション -->
+        <div class="post-actions">
+          <button class="post-action-btn" title="リプライ">
+            <i class="fa-regular fa-comment"></i>
+          </button>
+          <button class="post-action-btn" title="リポスト">
+            <i class="fa-solid fa-retweet"></i>
+          </button>
+          <button class="post-action-btn pin-btn" title="ピン留め">
+            <i class="fa-solid fa-thumbtack"></i>
+          </button>
+        </div>
+
+      </div>
     </div>
   </article>
   `;
@@ -347,6 +373,13 @@ function updateAllRelativeTimes() {
 // 1分ごとに相対時間を更新
 setInterval(updateAllRelativeTimes, 60000);
 
+// ピン留めのトグル
+document.querySelectorAll(".pin-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    btn.classList.toggle("pinned");
+    // [FLASK] fetch(`/api/posts/${postId}/pin`, { method: "POST" });
+  });
+});
 
 
 // ===== モーダル =====
