@@ -471,12 +471,13 @@ body.dark *{
     .fab:active { transform: scale(0.95); }
 
     /* モバイルモーダル：下からスライドアップ */
-    .modal-overlay { align-items: flex-end; }
+    .modal-overlay { align-items: flex-start; }
 
     .modal-box {
     width: 100%; max-width: 100%;
-    border-radius: 20px 20px 0 0;
+    border-radius: 16px;  /* 20px 20px 0 0 → 16px に変更（四方すべて角丸に） */
     padding: 20px 16px 32px;
+    margin-top: 16px;
     animation: modalSlideUp 0.25s ease;
     }
 

@@ -262,5 +262,8 @@
     margin: 0;
     }
 
+    .post-content p {
+    font-size: 13px;
+    }
    
 }
