@@ -1,15 +1,9 @@
+const postCountMap = JSON.parse(
+  document.getElementById("postCountMap")?.textContent || "{}"
+);
 
-const postCountMap = {
-  "2026-05-12": 5,  "2026-05-11": 12, "2026-05-10": 3,
-  "2026-05-09": 0,  "2026-05-08": 8,  "2026-05-07": 18,
-  "2026-05-06": 12, "2026-05-05": 7,  "2026-05-04": 2,
-  "2026-05-03": 15, "2026-05-02": 9,  "2026-05-01": 6,
-  "2026-04-30": 11, "2026-04-29": 4,  "2026-04-28": 20,
-  "2026-04-27": 0,  "2026-04-26": 7,  "2026-04-25": 3,
-  "2026-04-24": 16, "2026-04-23": 8,  "2026-04-22": 5,
-  "2026-04-21": 0,  "2026-04-20": 13, "2026-04-15": 9,
-};
-
+const postDates = Object.keys(postCountMap).sort();
+const oldestDate = postDates[0]; // 例: "2024-03-12"
 
 const groupedPosts = {
   "2026-05-07": [
@@ -26,73 +20,6 @@ const groupedPosts = {
   ],
 };
 
-// ユーザー情報
-// [FLASK] username / userId を {{ current_user.username }} 等で差し替え
-const USERNAME = "kan";
-const USER_ID  = "@lifelog_kan";
-
-// // ==========================================================
-// //  ポスト描画
-// // ==========================================================
-// // 日付ラベルを「YYYY年M月D日（曜）」形式に変換
-// function formatDateLabel(dateStr) {
-//   const d = new Date(dateStr + "T00:00:00");
-//   const week = ["日","月","火","水","木","金","土"][d.getDay()];
-//   return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日（${week}）`;
-// }
-
-// // 投稿データを受け取ってHTMLに描画
-// function renderPosts(data) {
-//   // data: { "YYYY-MM-DD": [{ time, content }, ...], ... }
-//   const container = document.getElementById("postLog");
-//   container.innerHTML = "";
-
-//   const dates = Object.keys(data).sort().reverse();
-
-//   if (dates.length === 0) {
-//     container.innerHTML = `
-//       <div class="log-empty">
-//         <div class="log-empty-icon">🌱</div>
-//         <div class="log-empty-text">まだ投稿はありません</div>
-//       </div>`;
-//     return;
-//   }
-
-//   // 日付ごとにグループ化して表示
-//   dates.forEach(dateStr => {
-//     const posts = data[dateStr];
-//     const group = document.createElement("div");
-//     group.className = "date-group";
-//     group.id = `date-${dateStr}`;
-
-//     const heading = document.createElement("div");
-//     heading.className = "date-heading";
-//     heading.innerHTML = `
-//       <span class="date-heading-text">${formatDateLabel(dateStr)}</span>
-//       <span class="date-count">${posts.length}件</span>`;
-//     group.appendChild(heading);
-
-//     posts.forEach(post => {
-//       const card = document.createElement("article");
-//       card.className = "tl-card";
-//       card.innerHTML = `
-//         <div class="post-header">
-//           <div class="post-avatar">${USERNAME[0]}</div>
-//           <div class="post-meta">
-//             <span class="post-username">${USERNAME}</span>
-//             <span class="post-userid">${USER_ID}</span>
-//             <span class="post-time">${post.time}</span>
-//           </div>
-//         </div>
-//         <div class="post-content"><p>${post.content}</p></div>`;
-//       group.appendChild(card);
-//     });
-
-//     container.appendChild(group);
-//   });
-// }
-
-// ページネーション（シンプル版 / Flask連携後はURLパラメータで制御）
 function renderPagination(current, total) {
   const el = document.getElementById("pagination");
   if (total <= 1) { el.innerHTML = ""; return; }
@@ -112,7 +39,6 @@ function renderPagination(current, total) {
 }
 
 function goPage(page) {
-  // [FLASK] window.location.href = `/post-log?page=${page}`;
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
@@ -120,7 +46,7 @@ function goPage(page) {
 function renderStats() {
   const w = document.getElementById("statsWidget");
   if (!w) return;
-  const fmt = n => Number(n).toLocaleString();
+  const fmt = n => Number(n || 0).toLocaleString();
   document.getElementById("statToday").innerHTML = `${fmt(w.dataset.today)}<span class="stat-unit">件</span>`;
   document.getElementById("statMonth").innerHTML = `${fmt(w.dataset.month)}<span class="stat-unit">件</span>`;
   document.getElementById("statYear").innerHTML  = `${fmt(w.dataset.year)}<span class="stat-unit">件</span>`;
@@ -147,10 +73,14 @@ function populateCalSelect(selectId) {
   const sel = document.getElementById(selectId);
   if (!sel) return;
   sel.innerHTML = "";
+
   const today = new Date();
-  for (let y = today.getFullYear(); y >= today.getFullYear() - 2; y--) {
+  const start = oldestDate ? new Date(oldestDate) : today;
+
+  for (let y = today.getFullYear(); y >= start.getFullYear(); y--) {
+    const minM = (y === start.getFullYear()) ? start.getMonth() : 0;
     const maxM = (y === today.getFullYear()) ? today.getMonth() : 11;
-    for (let m = maxM; m >= 0; m--) {
+    for (let m = maxM; m >= minM; m--) {
       const opt = document.createElement("option");
       opt.value = `${y}-${m}`;
       opt.textContent = `${y}年${m + 1}月`;
@@ -218,7 +148,7 @@ function buildCalendar(targetBodyId, targetSelectId) {
         a.className = "cal-day" + (isToday ? " today" : "");
         if (!isToday && level > 0) a.setAttribute("data-level", level);
         a.textContent = date;
-        a.href = "#";
+        a.href = `/postlog?date=${key}`;
         a.title = `${count}件`;
         a.onclick = (e) => { e.preventDefault(); jumpToDate(key); };
         td.appendChild(a);
@@ -231,9 +161,7 @@ function buildCalendar(targetBodyId, targetSelectId) {
 }
 
 function jumpToDate(dateKey) {
-  // [FLASK] window.location.href = `/post-log?date=${dateKey}`;
-  const target = document.getElementById(`date-${dateKey}`);
-  if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+  window.location.href = `/postlog?date=${dateKey}`;
 }
 
 // ランダムジャンプ（実装はFlask連携後）
@@ -262,7 +190,6 @@ function doSearch(from) {
 //  初期化
 // ==========================================================
 // renderPosts(groupedPosts);
-renderPagination(1, 12);
 renderStats();
 populateCalSelect("pcCalSelect");
 populateCalSelect("spCalSelect");
