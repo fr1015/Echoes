@@ -1,5 +1,3 @@
-
-
 /* ===== メインコンテンツ ===== */
 /* 左右サイドバーの幅だけ margin で避ける。背景は --bg */
 .main {
@@ -146,6 +144,8 @@
   color: var(--text-primary);
   word-break: break-word;
   margin: 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
 }
 
 /* ===== 紫：アクションバー ===== */
@@ -187,6 +187,62 @@
 
 .pin-btn.pinned:hover {
   color: var(--text-muted);
+}
+
+
+/* ===== 三点メニュー ===== */
+
+/* ドロップダウンメニュー本体 */
+.post-menu {
+  position: fixed;  /* スクロール位置に関わらず正確に表示 */
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  min-width: 160px;
+  z-index: 500;
+  overflow: hidden;
+  animation: menuIn 0.12s ease;
+}
+
+@keyframes menuIn {
+  from { opacity: 0; transform: scale(0.95) translateY(-4px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0); }
+}
+
+.post-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 11px 16px;
+  border: none;
+  background: none;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 13px;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background 0.1s;
+  text-align: left;
+}
+
+.post-menu-item:hover { background: var(--surface-hover); }
+
+.post-menu-item i {
+  width: 16px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+/* 削除は赤系 */
+.post-menu-item.danger       { color: #c0392b; }
+.post-menu-item.danger i     { color: #c0392b; }
+.post-menu-item.danger:hover { background: #fdf2f2; }
+
+.post-menu-divider {
+  height: 1px;
+  background: var(--border-light);
 }
 
 

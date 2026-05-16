@@ -326,6 +326,8 @@
     color: var(--text-primary);
     word-break: break-word;
     margin: 0;
+    white-space: pre-wrap;
+    word-wrap: break-word;
 }
 
 .log-empty {

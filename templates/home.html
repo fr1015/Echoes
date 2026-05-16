@@ -33,6 +33,27 @@
   </div>
 </div>
 
+<!-- ===== ポスト編集モーダル ===== -->
+<div class="modal-overlay" id="editModal" onclick="handleEditModalOverlayClick(event)">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span class="modal-title">ポストを編集</span>
+      <button class="modal-close" onclick="closeEditModal()">✕</button>
+    </div>
+    <div class="modal-composer">
+      <div class="avatar sm"></div>
+      <div class="modal-composer-body">
+        <textarea id="editPostText" maxlength="500" oninput="updateEditCharCount()"></textarea>
+        <div class="modal-footer">
+          <span class="char-count" id="editCharCount">0 / 500</span>
+          <button id="editCancelBtn" onclick="closeEditModal()">キャンセル</button>
+          <button id="editSaveBtn" onclick="submitEdit()">保存</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ===== 左サイドバー ===== -->
 <aside class="sidebar-left">
   <a class="logo" href="#">

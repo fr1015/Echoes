@@ -11,8 +11,7 @@ import uuid
 import datetime
 from werkzeug.utils import secure_filename
 from models import db, posts, post_images
-
-
+from flask_login import login_required, current_user
 
 crud_bp = Blueprint('crud', __name__) 
 
@@ -117,6 +116,33 @@ def create_post():
             "success": False,
             "error": str(e)
         }), 500
+
+@crud_bp.route("/api/posts/<int:post_id>/edit", methods=["POST"])
+@login_required
+def edit_post(post_id):
+    post = posts.query.filter_by(
+        post_id=post_id,
+        user_id=current_user.user_id
+    ).first_or_404()
+
+    data = request.get_json() or {}
+    content = (data.get("content") or "").strip()
+    if not content:
+        return jsonify({"success": False, "error": "empty"}), 400
+
+    post.content = content
+    db.session.commit()
+
+    return jsonify({
+        "success": True,
+        "post": {
+            "post_id": post.post_id,
+            "content": post.content,
+            "created_at": post.created_at.isoformat() + "Z",
+            "user_id": post.user_id,
+            "username": post.user.username
+        }
+    })
 
 
 
