@@ -164,10 +164,12 @@ function jumpToDate(dateKey) {
   window.location.href = `/postlog?date=${dateKey}`;
 }
 
-// ランダムジャンプ（実装はFlask連携後）
+// ランダムジャンプ
 function jumpToRandom() {
-  // [FLASK] 投稿がある日付のリストからランダムに選んでジャンプ
-  // 例: window.location.href = `/post-log?date=${randomDate}`;
+  const keys = Object.keys(postCountMap);
+  if (keys.length === 0) return;
+  const randomKey = keys[Math.floor(Math.random() * keys.length)];
+  jumpToDate(randomKey);
 }
 
 // ==========================================================
