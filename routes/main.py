@@ -67,7 +67,7 @@ def get_posts():
         )
 
     post_data = query.order_by(
-        posts.created_at.desc(),
+        posts.updated_at.desc(),
         posts.post_id.desc()
     ).limit(15).all()
 
@@ -76,7 +76,7 @@ def get_posts():
         return {
             "post_id": post.post_id,
             "content": post.content,
-            "created_at": post.created_at.isoformat() + "Z",
+            "updated_at": post.updated_at.isoformat() + "Z",
             "user_id": post.user_id,
             "username": post.user.username,
             "is_pinned": post.is_pinned

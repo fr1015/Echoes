@@ -76,7 +76,7 @@ let hasMore = true;
 
 // 最後に表示した投稿日時
 // 次回API取得時の基準になる
-let lastCreatedAt = null;
+let lastUpdatedAt = null;
 let lastPostId = null;
 
 
@@ -117,8 +117,8 @@ async function loadPosts() {
 
   try {
     let url = "/api/posts";
-    if (lastCreatedAt) {
-      url += "?last_created_at=" + encodeURIComponent(lastCreatedAt)
+    if (lastUpdatedAt) {
+      url += "?last_updated_at=" + encodeURIComponent(lastUpdatedAt)
            + "&last_post_id=" + encodeURIComponent(lastPostId);
     }
 
@@ -134,7 +134,7 @@ async function loadPosts() {
     data.forEach(post => addPostToTimeline(post, post.is_pinned));
 
     const lastPost = data[data.length - 1];
-    lastCreatedAt = lastPost.created_at;
+    lastUpdatedAt = lastPost.updated_at;
     lastPostId = lastPost.post_id;
 
   } catch (error) {
@@ -223,8 +223,8 @@ function addPostToTimeline(post, prepend = false) {
           <div class="post-header">
             <span class="username">${post.username}</span>
             <span class="userid">@${post.user_id}</span>
-            <span class="post-time" data-time="${post.created_at}">
-              ${formatRelativeTime(post.created_at)}
+            <span class="post-time" data-time="${post.updated_at}">
+              ${formatRelativeTime(post.updated_at)}
             </span>
           </div>
           <div class="post-content">
@@ -240,13 +240,19 @@ function addPostToTimeline(post, prepend = false) {
             <button class="post-action-btn pin-btn ${post.is_pinned ? "pinned" : ""}" title="ピン留め">
               <i class="fa-solid fa-thumbtack"></i>
             </button>
+            <!-- 三点メニュー -->
+            <button class="post-action-btn more-btn" title="その他" onclick="openPostMenu(event, '${post.post_id}')">
+              <i class="fa-solid fa-ellipsis-vertical"></i>
+            </button>
           </div>
         </div>
       </div>
     </article>
   `;
 
-  // ピントグル
+  postEl.dataset.postId = post.post_id;
+
+  // ピンのトグルボタン
   const pinBtn = postEl.querySelector(".pin-btn");
   pinBtn.addEventListener("click", async () => {
     const wantPin = !postEl.classList.contains("pinned");
@@ -281,6 +287,109 @@ function addPostToTimeline(post, prepend = false) {
   }
 }
 
+
+
+// ===== 三点メニュー =====
+let currentMenu = null;
+
+function openPostMenu(event, postId) {
+  event.stopPropagation();
+
+  // 既に開いていれば閉じる
+  if (currentMenu) { closePostMenu(); return; }
+
+  const btn = event.currentTarget;
+  const rect = btn.getBoundingClientRect();
+
+  const menu = document.createElement("div");
+  menu.className = "post-menu";
+  menu.id = "postMenu";
+  menu.innerHTML = `
+    <button class="post-menu-item" onclick="handleEdit('${postId}')">
+      <i class="fa-regular fa-pen-to-square"></i> 編集
+    </button>
+    <div class="post-menu-divider"></div>
+    <button class="post-menu-item danger" onclick="handleDelete('${postId}')">
+      <i class="fa-regular fa-trash-can"></i> 削除
+    </button>
+  `;
+
+  // ボタンの左下に表示（画面端対応）
+  document.body.appendChild(menu);
+  const menuW = menu.offsetWidth;
+  const menuH = menu.offsetHeight;
+
+  let top  = rect.bottom + 4;
+  let left = rect.left - menuW + rect.width;
+
+  // 画面下にはみ出すなら上に表示
+  if (top + menuH > window.innerHeight - 8) top = rect.top - menuH - 4;
+  // 画面左にはみ出すなら右端を合わせる
+  if (left < 8) left = 8;
+
+  menu.style.top  = `${top}px`;
+  menu.style.left = `${left}px`;
+
+  currentMenu = menu;
+}
+
+function closePostMenu() {
+  if (currentMenu) {
+    currentMenu.remove();
+    currentMenu = null;
+  }
+}
+
+
+// メニュー外クリックで閉じる
+document.addEventListener("click", closePostMenu);
+
+// ===== 編集・削除（ここを実装してください） =====
+function handleEdit(postId) {
+  closePostMenu();
+  editingPostId = postId;
+
+  const card = document.querySelector(`.tl-card[data-post-id="${postId}"]`);
+  const current = card?.querySelector(".post-content p")?.textContent || "";
+  document.getElementById("editPostText").value = current;
+  updateEditCharCount();
+
+  openEditModal();
+}
+
+async function submitEdit() {
+  if (!editingPostId) return;
+
+  const content = document.getElementById("editPostText").value.trim();
+  if (!content) return;
+
+  const res = await fetch(`/api/posts/${editingPostId}/edit`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ content })
+  });
+
+  const data = await res.json();
+  if (!data.success) {
+    alert("編集に失敗しました");
+    return;
+  }
+
+  // TL更新
+  const card = document.querySelector(`.tl-card[data-post-id="${editingPostId}"]`);
+  if (card) {
+    card.querySelector(".post-content p").textContent = data.post.content;
+  }
+
+  closeEditModal();
+  editingPostId = null;
+}
+
+function handleDelete(postId) {
+  closePostMenu();
+  // [YOUR CODE] 削除確認・API呼び出し処理
+  console.log("delete:", postId);
+}
 
 
 // 無限スクロール
@@ -371,13 +480,7 @@ function updateAllRelativeTimes() {
 // 1分ごとに相対時間を更新
 setInterval(updateAllRelativeTimes, 60000);
 
-// ピン留めのトグル
-document.querySelectorAll(".pin-btn").forEach(btn => {
-  btn.addEventListener("click", () => {
-    btn.classList.toggle("pinned");
-    // [FLASK] fetch(`/api/posts/${postId}/pin`, { method: "POST" });
-  });
-});
+
 
 
 // ===== モーダル =====
@@ -588,5 +691,37 @@ function buildHeatmap() {
 }
 
 loadHeatmapData();
+
+let editingPostId = null;
+
+function openEditModal() {
+  document.getElementById("editModal").classList.add("open");
+  setTimeout(() => document.getElementById("editPostText").focus(), 50);
+}
+
+function closeEditModal() {
+  document.getElementById("editModal").classList.remove("open");
+}
+
+function handleEditModalOverlayClick(e) {
+  if (e.target === document.getElementById("editModal")) closeEditModal();
+}
+
+function updateEditCharCount() {
+  const ta = document.getElementById("editPostText");
+  document.getElementById("editCharCount").textContent = `${ta.value.length} / 500`;
+}
+
+function handleEdit(postId) {
+  closePostMenu();
+  editingPostId = postId;
+
+  const card = document.querySelector(`.tl-card[data-post-id="${postId}"]`);
+  const current = card?.querySelector(".post-content p")?.textContent || "";
+  document.getElementById("editPostText").value = current;
+  updateEditCharCount();
+
+  openEditModal();
+}
 
 
