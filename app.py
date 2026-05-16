@@ -55,7 +55,7 @@ def create_app():
     db.init_app(app)
     Migrate(app, db)
 
-    login_manager.login_view = 'login'
+    login_manager.login_view = 'login_auth_bp.login'
 
     # ブループリントの登録
     app.register_blueprint(login_auth_bp)
@@ -76,4 +76,3 @@ app = create_app()
 if __name__ == '__main__':
     # アプリの起動
     app.run(host='0.0.0.0', port=5000, debug=True)
-   
