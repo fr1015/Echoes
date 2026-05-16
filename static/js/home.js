@@ -228,7 +228,7 @@ function addPostToTimeline(post, prepend = false) {
             </span>
           </div>
           <div class="post-content">
-            <p>${post.content}</p>
+            <p>${linkify(post.content)}</p>
           </div>
           <div class="post-actions">
             <button class="post-action-btn" title="リプライ">
@@ -722,6 +722,25 @@ function handleEdit(postId) {
   updateEditCharCount();
 
   openEditModal();
+}
+
+// HTMLエスケープとURLリンク化
+function escapeHtml(str) {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function linkify(text) {
+  const escaped = escapeHtml(text);
+
+  return escaped.replace(
+    /(https?:\/\/[^\s]+)/g,
+    '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>'
+  );
 }
 
 

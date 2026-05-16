@@ -6,15 +6,49 @@ from routes.login_auth import login_auth_bp
 from routes.crud import create_post
 from datetime import datetime, timezone
 from sqlalchemy import text
+import re
+from markupsafe import escape, Markup
 
 main_bp = Blueprint('main_bp', __name__)
 
-
 # ===================================================================================
 
+URL_RE = re.compile(r'https?://[^\s<]+')
 
+TRAILING_PUNCTUATION = '.,!?;:)])}'
 
+def replace_url(match):
+    url = match.group(0)
 
+    trailing = ''
+
+    while url and url[-1] in TRAILING_PUNCTUATION:
+        trailing = url[-1] + trailing
+        url = url[:-1]
+
+    escaped_url = escape(url)
+
+    return (
+        f'<a href="{escaped_url}" '
+        f'target="_blank" '
+        f'rel="noopener noreferrer nofollow">'
+        f'{escaped_url}</a>'
+        f'{trailing}'
+    )
+
+@main_bp.app_template_filter('linkify')
+def linkify(text):
+    if not text:
+        return ''
+
+    # 正規化（CRLF → LF）
+    escaped = escape(text).replace('\r\n', '\n').replace('\r', '\n')
+
+    # 各行ごとに URL 置換を行い、最後に <br> で結合
+    parts = [URL_RE.sub(replace_url, line) for line in escaped.split('\n')]
+
+    linked = '<br>'.join(parts)
+    return Markup(linked)
 
 # ===================================================================================
 
@@ -88,8 +122,6 @@ def get_posts():
     result.extend([serialize(p) for p in post_data])
 
     return jsonify(result)
-
-
 
 
 # ヒートマップ用API
