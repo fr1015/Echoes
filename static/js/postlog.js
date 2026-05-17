@@ -5,20 +5,6 @@ const postCountMap = JSON.parse(
 const postDates = Object.keys(postCountMap).sort();
 const oldestDate = postDates[0]; // 例: "2024-03-12"
 
-const groupedPosts = {
-  "2026-05-07": [
-    { time: "07:19", content: "今日は朝からコードを書いていた。だいぶ形になってきた気がする。" },
-    { time: "09:43", content: "CSSのレイアウト沼にはまりかけたけどなんとか抜け出せた。flexboxは偉大。" },
-    { time: "12:30", content: "昼ごはん食べながらドキュメントを読んでいた。Flaskのblueprintが意外と便利だということに気づいた。" },
-  ],
-  "2026-05-06": [
-    { time: "08:02", content: "SQLAlchemyのリレーション設定でちょっとはまった。back_populatesとbackrefの違いをちゃんと理解できていなかった。" },
-    { time: "22:15", content: "今日のまとめ：DB設計を見直して、マイグレーションを走らせた。うまくいって安心。" },
-  ],
-  "2026-05-05": [
-    { time: "11:20", content: "祝日なのでのんびり開発。モーダルのアニメーションを整えた。細かいところが気になるたちなので時間がかかる。" },
-  ],
-};
 
 function renderPagination(current, total) {
   const el = document.getElementById("pagination");

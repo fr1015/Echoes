@@ -1,8 +1,17 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
+from zoneinfo import ZoneInfo
 
 db = SQLAlchemy()
+
+JST = ZoneInfo("Asia/Tokyo")
+
+def to_jst(dt):
+    # tz-naiveならUTC扱いでJSTへ
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt.astimezone(JST)
 
 from flask_login import UserMixin
 
@@ -38,6 +47,14 @@ class users(db.Model):
     profile_updates = db.relationship('profile_update', backref='user', lazy=True)
     bookmarks = db.relationship('post_bookmark', backref='user', lazy=True)
 
+    @property
+    def created_at_jst(self):
+        return to_jst(self.created_at)
+
+    @property
+    def updated_at_jst(self):
+        return to_jst(self.updated_at)
+
 
 
 # ---------------------------------
@@ -51,6 +68,10 @@ class profile_update(db.Model):
     header_path = db.Column(db.String)
     bio = db.Column(db.String)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    @property
+    def updated_at_jst(self):
+        return to_jst(self.updated_at)
 
 
 
@@ -89,7 +110,15 @@ class posts(db.Model):
     post_bookmarks = db.relationship('post_bookmark', backref='post', lazy=True)
     post_images = db.relationship('post_images', backref='post', lazy=True)
 
+    @property
+    def created_at_jst(self):
+        return to_jst(self.created_at)
 
+    @property
+    def updated_at_jst(self):
+        return to_jst(self.updated_at)
+    
+    
 
 # ---------------------------------
 # ポスト画像モデル
@@ -101,6 +130,7 @@ class post_images(db.Model):
     sort_order = db.Column(db.Integer, nullable=False)
 
     db.UniqueConstraint('post_id', 'sort_order', name='uq_post_image_order')
+
 
 
 
@@ -121,6 +151,7 @@ class post_tags(db.Model):
     tags_id = db.Column(db.Integer, db.ForeignKey('tags.tags_id'), primary_key=True, nullable=False, index=True)
 
     db.UniqueConstraint('post_id', 'tags_id', name='uq_post_tags')
+
 
 
 

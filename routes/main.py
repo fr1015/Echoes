@@ -13,6 +13,7 @@ main_bp = Blueprint('main_bp', __name__)
 
 # ===================================================================================
 
+# URLをリンク化するフィルタ
 URL_RE = re.compile(r'https?://[^\s<]+')
 
 TRAILING_PUNCTUATION = '.,!?;:)])}'
@@ -36,6 +37,7 @@ def replace_url(match):
         f'{trailing}'
     )
 
+# テキスト中のURLをリンク化するテンプレートフィルタ
 @main_bp.app_template_filter('linkify')
 def linkify(text):
     if not text:
@@ -134,10 +136,10 @@ def get_heatmap():
     # "2026-05-11" の形式になる
     rows = db.session.execute(text("""
         SELECT
-            DATE(created_at) AS post_date,
+            DATE(datetime(created_at, '+9 hours')) AS post_date,
             COUNT(*) AS post_count
         FROM posts
-        GROUP BY DATE(created_at)
+        GROUP BY DATE(datetime(created_at, '+9 hours'))
     """))
 
     # JSで扱いやすい辞書形式に変換

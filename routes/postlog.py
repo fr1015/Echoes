@@ -5,6 +5,10 @@ from models import users, db, posts
 from collections import OrderedDict
 from sqlalchemy import func
 from datetime import datetime, timedelta
+from datetime import timezone
+from zoneinfo import ZoneInfo
+
+JST = ZoneInfo("Asia/Tokyo")
 
 postlog_bp = Blueprint('postlog_bp', __name__)
 
@@ -26,40 +30,63 @@ def postlog():
     page_q = all_posts_q
 
     if date_str:
-        # その日付だけ表示
-        page_q = page_q.filter(func.date(posts.created_at) == date_str)
+        # JST日付に合わせてフィルタ
+        page_q = page_q.filter(
+            func.date(func.datetime(posts.updated_at, "+9 hours")) == date_str
+        )
 
     pagination = (page_q
-        .order_by(posts.created_at.desc(), posts.post_id.desc())
+        .order_by(posts.updated_at.desc(), posts.post_id.desc())
         .paginate(page=page, per_page=per_page, error_out=False))
 
     posts_by_date = OrderedDict()
     for p in pagination.items:
-        day = p.created_at.date()
+        day = p.updated_at_jst.date()
         posts_by_date.setdefault(day, []).append(p)
 
-    # 日別件数ヒートマップ用
+    # 日別件数ヒートマップ用（JST基準）
     count_rows = (all_posts_q
-        .with_entities(func.date(posts.created_at), func.count())
-        .group_by(func.date(posts.created_at))
+        .with_entities(
+            func.date(func.datetime(posts.updated_at, "+9 hours")),
+            func.count()
+        )
+        .group_by(func.date(func.datetime(posts.updated_at, "+9 hours")))
         .all())
     post_count_map = {str(d): c for d, c in count_rows}
 
-    now = datetime.utcnow()
-    today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
-    tomorrow_start = today_start + timedelta(days=1)
-    month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-    if now.month == 12:
-        next_month_start = month_start.replace(year=now.year + 1, month=1)
-    else:
-        next_month_start = month_start.replace(month=now.month + 1)
-    year_start = now.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
-    next_year_start = year_start.replace(year=now.year + 1)
+    # 統計用の日時計算
+    now_utc = datetime.now(timezone.utc)
+    now_jst = now_utc.astimezone(JST)
 
+    today_start_jst = now_jst.replace(hour=0, minute=0, second=0, microsecond=0)
+    tomorrow_start_jst = today_start_jst + timedelta(days=1)
+
+    month_start_jst = now_jst.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    if now_jst.month == 12:
+        next_month_start_jst = month_start_jst.replace(year=now_jst.year + 1, month=1)
+    else:
+        next_month_start_jst = month_start_jst.replace(month=now_jst.month + 1)
+
+    year_start_jst = now_jst.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
+    next_year_start_jst = year_start_jst.replace(year=now_jst.year + 1)
+
+    def to_utc_naive(dt):
+        return dt.astimezone(timezone.utc).replace(tzinfo=None)
+
+    # 日別、月別、年別、全体の投稿数を集計（JST基準）
     post_stats = {
-        "today": all_posts_q.filter(posts.created_at >= today_start, posts.created_at < tomorrow_start).count(),
-        "month": all_posts_q.filter(posts.created_at >= month_start, posts.created_at < next_month_start).count(),
-        "year": all_posts_q.filter(posts.created_at >= year_start, posts.created_at < next_year_start).count(),
+        "today": all_posts_q.filter(
+            posts.updated_at >= to_utc_naive(today_start_jst),
+            posts.updated_at < to_utc_naive(tomorrow_start_jst)
+        ).count(),
+        "month": all_posts_q.filter(
+            posts.updated_at >= to_utc_naive(month_start_jst),
+            posts.updated_at < to_utc_naive(next_month_start_jst)
+        ).count(),
+        "year": all_posts_q.filter(
+            posts.updated_at >= to_utc_naive(year_start_jst),
+            posts.updated_at < to_utc_naive(next_year_start_jst)
+        ).count(),
         "total": all_posts_q.count(),
     }
 
