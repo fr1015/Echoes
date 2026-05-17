@@ -64,64 +64,65 @@ def home():
 @main_bp.route('/api/posts')
 @login_required # ログイン必須
 def get_posts():
-    query = posts.query
+     query = posts.query
+     
+    
+     last_updated_at = request.args.get("last_updated_at")
+     last_post_id = request.args.get("last_post_id")
 
-    last_created_at = request.args.get("last_created_at")
-    last_post_id = request.args.get("last_post_id")
+     # ページング対象は常に「ピン以外」にする（重複回避）
+     query = query.filter(posts.is_pinned.is_(False))
 
-    # ページング対象は常に「ピン以外」にする（重複回避）
-    query = query.filter(posts.is_pinned.is_(False))
+     pinned_post = None
+     # 初回だけピンを別枠で取得
+     if not last_updated_at and not last_post_id:
+         pinned_post = (posts.query
+             .filter(
+                 posts.user_id == current_user.user_id,
+                 posts.is_pinned.is_(True)
+             )
+             .order_by(posts.created_at.desc(), posts.post_id.desc())
+             .first()
+         )
 
-    pinned_post = None
-    # 初回だけピンを別枠で取得
-    if not last_created_at and not last_post_id:
-        pinned_post = (posts.query
-            .filter(
-                posts.user_id == current_user.user_id,
-                posts.is_pinned.is_(True)
-            )
-            .order_by(posts.created_at.desc(), posts.post_id.desc())
-            .first()
-        )
+     # ページングのパラメータがあれば、作成日時とIDで次のページ以降を取得する条件を追加
+     if last_updated_at and last_post_id:
+         last_updated_at = datetime.fromisoformat(
+             last_updated_at.replace("Z", "+00:00")
+         )
+         last_post_id = int(last_post_id)
+         query = query.filter(
+             db.or_(
+                 posts.updated_at < last_updated_at,
+                 db.and_(
+                     posts.updated_at == last_updated_at,
+                     posts.post_id < last_post_id
+                 )
+             )
+         )
 
-    # ページングのパラメータがあれば、作成日時とIDで次のページ以降を取得する条件を追加
-    if last_created_at and last_post_id:
-        last_created_at = datetime.fromisoformat(
-            last_created_at.replace("Z", "+00:00")
-        )
-        last_post_id = int(last_post_id)
-        query = query.filter(
-            db.or_(
-                posts.created_at < last_created_at,
-                db.and_(
-                    posts.created_at == last_created_at,
-                    posts.post_id < last_post_id
-                )
-            )
-        )
+     post_data = query.order_by(
+         posts.updated_at.desc(),
+         posts.post_id.desc()
+     ).limit(15).all()
 
-    post_data = query.order_by(
-        posts.updated_at.desc(),
-        posts.post_id.desc()
-    ).limit(15).all()
+     # ピンと通常投稿を合わせてシリアライズする関数
+     def serialize(post):
+         return {
+             "post_id": post.post_id,
+             "content": post.content,
+             "updated_at": post.updated_at.isoformat() + "Z",
+             "user_id": post.user_id,
+             "username": post.user.username,
+             "is_pinned": post.is_pinned
+         }
 
-    # ピンと通常投稿を合わせてシリアライズする関数
-    def serialize(post):
-        return {
-            "post_id": post.post_id,
-            "content": post.content,
-            "updated_at": post.updated_at.isoformat() + "Z",
-            "user_id": post.user_id,
-            "username": post.user.username,
-            "is_pinned": post.is_pinned
-        }
+     result = []
+     if pinned_post:
+         result.append(serialize(pinned_post))
+     result.extend([serialize(p) for p in post_data])
 
-    result = []
-    if pinned_post:
-        result.append(serialize(pinned_post))
-    result.extend([serialize(p) for p in post_data])
-
-    return jsonify(result)
+     return jsonify(result)
 
 
 # ヒートマップ用API

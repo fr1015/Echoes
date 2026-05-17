@@ -61,7 +61,7 @@ class posts(db.Model):
     post_id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.String, db.ForeignKey('users.user_id'))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     content = db.Column(db.String)
     created_app = db.Column(db.String, db.CheckConstraint("created_app IN ('Echoes', 'Twitter', 'Misskey')", name='check_created_app'), nullable=False)
@@ -132,4 +132,12 @@ class post_bookmark(db.Model):
     post_id = db.Column(db.Integer, db.ForeignKey('posts.post_id'), primary_key=True, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    
+from sqlalchemy import event
+from sqlalchemy.orm.attributes import get_history
+
+@event.listens_for(posts, 'before_update')
+def update_posts_timestamp(mapper, connection, target):
+    if get_history(target, 'content').has_changes():
+        target.updated_at = datetime.utcnow()
+
+

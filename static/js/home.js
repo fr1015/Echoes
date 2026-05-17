@@ -143,6 +143,7 @@ async function loadPosts() {
     isLoading = false;
     showLoading(false);
   }
+  
 }
 
 
@@ -406,6 +407,7 @@ function setupInfiniteScroll() {
     rootMargin: "300px"
   });
   observer.observe(trigger);
+  
 }
 
 
@@ -742,5 +744,6 @@ function linkify(text) {
     '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>'
   );
 }
+
 
 
