@@ -3,40 +3,42 @@ import re
 from app import app, db
 from models import posts, tags, post_tags
 
+# 記号の前後除去用（許可文字以外を端から落とす）
+TRIM_RE = re.compile(r'^[^0-9A-Za-z_\-\u3040-\u30FF\u4E00-\u9FFF]+|[^0-9A-Za-z_\-\u3040-\u30FF\u4E00-\u9FFF]+$')
 
-# =========================================
-# ハッシュタグ抽出用正規表現
-# =========================================
-HASHTAG_RE = re.compile(r'#([^\s#]+)')
+# 許可文字のみに限定
+ALLOWED_RE = re.compile(r'^[0-9A-Za-z_\-\u3040-\u30FF\u4E00-\u9FFF]+$')
 
+# 行頭 or 空白の直後の # だけを拾う
+HASHTAG_RE = re.compile(r'(?:^|\s)#([^\s#]+)')
 
-# =========================================
-# ハッシュタグ抽出関数
-# =========================================
 def extract_tags(text: str) -> list[str]:
-
     if not text:
         return []
 
-    raw_tags = HASHTAG_RE.findall(text)
-
+    raw_tags = [m.group(1) for m in HASHTAG_RE.finditer(text)]
     normalized_tags = []
 
     for tag in raw_tags:
+        # 前後の記号を除去
+        tag = TRIM_RE.sub('', tag)
 
-        # 小文字化
-        normalized = tag.lower()
-
-        # 前後空白除去
-        normalized = normalized.strip()
-
-        # 空ならスキップ
-        if not normalized:
+        if not tag:
             continue
 
-        normalized_tags.append(normalized)
+        # 許可文字のみかチェック（絵文字や記号を排除）
+        if not ALLOWED_RE.match(tag):
+            continue
 
-    # 重複除去
+        # 英字を小文字化
+        tag = tag.lower()
+
+        # 30文字まで
+        tag = tag[:30]
+
+        if tag:
+            normalized_tags.append(tag)
+
     return list(set(normalized_tags))
 
 
