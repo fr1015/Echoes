@@ -216,6 +216,9 @@ function addPostToTimeline(post, prepend = false) {
   postEl.classList.add("tl-card");
   if (post.is_pinned) postEl.classList.add("pinned");
 
+  const timeString = post.updated_at || post.created_at || "";
+  const relativeTime = formatRelativeTime(timeString);
+
   postEl.innerHTML = `
     <article class="tl-card">
       <div class="tl-card-inner">
@@ -224,8 +227,8 @@ function addPostToTimeline(post, prepend = false) {
           <div class="post-header">
             <span class="username">${post.username}</span>
             <span class="userid">@${post.user_id}</span>
-            <span class="post-time" data-time="${post.updated_at}">
-              ${formatRelativeTime(post.updated_at)}
+            <span class="post-time" data-time="${timeString}">
+              ${relativeTime}
             </span>
           </div>
           <div class="post-content">
@@ -252,6 +255,12 @@ function addPostToTimeline(post, prepend = false) {
   `;
 
   postEl.dataset.postId = post.post_id;
+
+  // 相対時間の更新
+  const timeEl = postEl.querySelector(".post-time");
+  timeEl.textContent = relativeTime;
+
+
 
   // ピンのトグルボタン
   const pinBtn = postEl.querySelector(".pin-btn");
@@ -436,8 +445,16 @@ function showEndMessage() {
 
 // 相対時間表示
 function formatRelativeTime(dateString) {
+  if (!dateString) {
+    return "たった今";
+  }
+
   const now = new Date();
   const postDate = new Date(dateString);
+
+  if (Number.isNaN(postDate.getTime())) {
+    return "たった今";
+  }
 
   const diffMs = now - postDate;
   const diffMinutes = Math.floor(diffMs / 1000 / 60);

@@ -101,6 +101,7 @@ def create_post():
                 "post_id": new_post.post_id,
                 "content": new_post.content,
                 "created_at": new_post.created_at.isoformat() + "Z",
+                "updated_at": new_post.updated_at.isoformat() + "Z",
                 "post_type": new_post.post_type,
                 "reply_to_post_id": new_post.reply_to_post_id,
                 "quote_of_post_id": new_post.quote_of_post_id,
@@ -139,6 +140,7 @@ def edit_post(post_id):
             "post_id": post.post_id,
             "content": post.content,
             "created_at": post.created_at.isoformat() + "Z",
+            "updated_at": post.updated_at.isoformat() + "Z",
             "user_id": post.user_id,
             "username": post.user.username
         }
