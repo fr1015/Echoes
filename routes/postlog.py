@@ -35,9 +35,13 @@ def postlog():
             func.date(func.datetime(posts.updated_at, "+9 hours")) == date_str
         )
 
-    pagination = (page_q
-        .order_by(posts.updated_at.desc(), posts.post_id.desc())
-        .paginate(page=page, per_page=per_page, error_out=False))
+        pagination = (page_q
+            .order_by(posts.updated_at.asc(), posts.post_id.asc())
+            .paginate(page=page, per_page=per_page, error_out=False))
+    else:
+        pagination = (page_q
+            .order_by(posts.updated_at.desc(), posts.post_id.desc())
+            .paginate(page=page, per_page=per_page, error_out=False))
 
     posts_by_date = OrderedDict()
     for p in pagination.items:

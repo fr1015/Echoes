@@ -99,7 +99,7 @@
             <span class="date-heading-text">
               {{ day.strftime('%Y年%#m月%#d日') }}（{{ day.strftime('%a') }}）
             </span>
-            <span class="date-count">{{ day_posts|length }}件</span>
+            <span class="date-count">{{ post_count_map.get(day.strftime('%Y-%m-%d'), 0) }}件</span>
           </div>
 
           {% for post in day_posts %}
@@ -126,9 +126,15 @@
   </div>
 
   <div class="pagination" id="pagination">
+    {% set date_param = request.args.get('date') %}
     {% if pagination.has_prev %}
-      <a href="{{ url_for('postlog_bp.postlog', page=1) }}">最初</a>
-      <a href="{{ url_for('postlog_bp.postlog', page=pagination.prev_num) }}">前へ</a>
+      {% if date_param %}
+        <a href="{{ url_for('postlog_bp.postlog', page=1, date=date_param) }}">最初</a>
+        <a href="{{ url_for('postlog_bp.postlog', page=pagination.prev_num, date=date_param) }}">前へ</a>
+      {% else %}
+        <a href="{{ url_for('postlog_bp.postlog', page=1) }}">最初</a>
+        <a href="{{ url_for('postlog_bp.postlog', page=pagination.prev_num) }}">前へ</a>
+      {% endif %}
     {% endif %}
 
     {% for p in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
@@ -136,7 +142,11 @@
         {% if p == pagination.page %}
           <span class="is-current">{{ p }}</span>
         {% else %}
-          <a href="{{ url_for('postlog_bp.postlog', page=p) }}">{{ p }}</a>
+          {% if date_param %}
+            <a href="{{ url_for('postlog_bp.postlog', page=p, date=date_param) }}">{{ p }}</a>
+          {% else %}
+            <a href="{{ url_for('postlog_bp.postlog', page=p) }}">{{ p }}</a>
+          {% endif %}
         {% endif %}
       {% else %}
         <span class="ellipsis">…</span>
@@ -144,8 +154,13 @@
     {% endfor %}
 
     {% if pagination.has_next %}
-      <a href="{{ url_for('postlog_bp.postlog', page=pagination.next_num) }}">次へ</a>
-      <a href="{{ url_for('postlog_bp.postlog', page=pagination.pages) }}">最後</a>
+      {% if date_param %}
+        <a href="{{ url_for('postlog_bp.postlog', page=pagination.next_num, date=date_param) }}">次へ</a>
+        <a href="{{ url_for('postlog_bp.postlog', page=pagination.pages, date=date_param) }}">最後</a>
+      {% else %}
+        <a href="{{ url_for('postlog_bp.postlog', page=pagination.next_num) }}">次へ</a>
+        <a href="{{ url_for('postlog_bp.postlog', page=pagination.pages) }}">最後</a>
+      {% endif %}
     {% endif %}
   </div>
 
@@ -234,12 +249,12 @@
 <!-- ===== ボトムナビ ===== -->
 <nav class="bottom-nav">
 
-  <a class="bottom-nav-item" href="#">
+  <a class="bottom-nav-item" href="/home">
     <span class="bn-icon"><i class="fa-regular fa-house"></i></span>
     <span>TL</span>
   </a>
 
-  <a class="bottom-nav-item active" href="#">
+  <a class="bottom-nav-item active" href="/postlog">
     <span class="bn-icon"><i class="fa-regular fa-file-lines"></i></span>
     <span>ログ</span>
   </a>

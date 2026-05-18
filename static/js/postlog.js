@@ -42,8 +42,20 @@ function renderStats() {
 // ==========================================================
 //  カレンダー
 // ==========================================================
-let calYear  = new Date().getFullYear();
-let calMonth = new Date().getMonth();
+function getInitialCalendarDate() {
+  const params = new URLSearchParams(window.location.search);
+  const dateParam = params.get("date");
+  if (dateParam) {
+    const parsed = new Date(`${dateParam}T00:00:00`);
+    if (!Number.isNaN(parsed.getTime())) {
+      return parsed;
+    }
+  }
+  return new Date();
+}
+const initialCalendarDate = getInitialCalendarDate();
+let calYear  = initialCalendarDate.getFullYear();
+let calMonth = initialCalendarDate.getMonth();
 
 // 投稿数をレベル0〜4に変換
 function getLevel(count) {
