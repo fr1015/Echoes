@@ -130,16 +130,17 @@ def get_posts():
 # ヒートマップ用API
 # 日ごとの投稿数を返す
 @main_bp.route("/heatmap")
+@login_required
 def get_heatmap():
-    # created_at を日単位に丸めて集計
-    # DATE(created_at) によって
+    # updated_at を日単位に丸めて集計
+    # DATE(updated_at) によって
     # "2026-05-11" の形式になる
     rows = db.session.execute(text("""
         SELECT
-            DATE(datetime(created_at, '+9 hours')) AS post_date,
+            DATE(datetime(updated_at, '+9 hours')) AS post_date,
             COUNT(*) AS post_count
         FROM posts
-        GROUP BY DATE(datetime(created_at, '+9 hours'))
+        GROUP BY DATE(datetime(updated_at, '+9 hours'))
     """))
 
     # JSで扱いやすい辞書形式に変換
@@ -150,6 +151,8 @@ def get_heatmap():
 
     # JSONとして返却
     return jsonify(heatmap_data)
+
+
 
 # ポストピン用API
 @main_bp.route("/api/posts/<int:post_id>/pin", methods=["POST"])

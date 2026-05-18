@@ -696,8 +696,11 @@ function buildHeatmap() {
 
       // CSSクラス付与
       cell.className = `heatmap-cell level-${level}`;
+      cell.dataset.date = k;
+      cell.addEventListener("click", () => {
+        window.location.href = `/postlog?date=${encodeURIComponent(k)}`;
+      });
 
-      // tooltip
       cell.innerHTML = `
         <span class="tooltip">
           ${k}<br>

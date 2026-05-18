@@ -54,6 +54,7 @@ def save_image(image):
 
 # ポスト作成処理
 @crud_bp.route("/post/create", methods=["POST"])
+@login_required
 def create_post():
     try:
         user_id = session.get("user_id")
