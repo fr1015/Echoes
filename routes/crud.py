@@ -10,22 +10,50 @@ import os
 import uuid
 import datetime
 from werkzeug.utils import secure_filename
-from models import db, posts, post_images
+from models import db, posts, post_images, tags, post_tags
 from flask_login import login_required, current_user
 
 crud_bp = Blueprint('crud', __name__) 
 
 
-# ハッシュタグ抽出関数
+# 記号の前後除去用（許可文字以外を端から落とす）
+TRIM_RE = re.compile(r'^[^0-9A-Za-z_\-\u3040-\u30FF\u4E00-\u9FFF]+|[^0-9A-Za-z_\-\u3040-\u30FF\u4E00-\u9FFF]+$')
 
-def extract_hashtags(text):
+# 許可文字のみに限定
+ALLOWED_RE = re.compile(r'^[0-9A-Za-z_\-\u3040-\u30FF\u4E00-\u9FFF]+$')
 
-    hashtags = re.findall(
-        r"#(\w+)",
-        text
-    )
+# 行頭 or 空白の直後の # だけを拾う
+HASHTAG_RE = re.compile(r'(?:^|\s)#([^\s#]+)')
 
-    return list(set(hashtags))
+# ハッシュタグ抽出関数（tag.py と同じ条件）
+def extract_tags(text: str) -> list[str]:
+    if not text:
+        return []
+
+    raw_tags = [m.group(1) for m in HASHTAG_RE.finditer(text)]
+    normalized_tags = []
+
+    for tag in raw_tags:
+        # 前後の記号を除去
+        tag = TRIM_RE.sub('', tag)
+
+        if not tag:
+            continue
+
+        # 許可文字のみかチェック（絵文字や記号を排除）
+        if not ALLOWED_RE.match(tag):
+            continue
+
+        # 英字を小文字化
+        tag = tag.lower()
+
+        # 30文字まで
+        tag = tag[:30]
+
+        if tag:
+            normalized_tags.append(tag)
+
+    return list(set(normalized_tags))
 
 
 
@@ -94,6 +122,26 @@ def create_post():
         # DBに追加してコミット
         db.session.add(new_post)
         db.session.flush()  # post_id を生成するために flush
+
+        # タグ抽出 → tags / post_tags へ登録
+        tags_data = extract_tags(content)
+        for tag_name in tags_data:
+            tag_obj = tags.query.filter_by(tags_name=tag_name).first()
+            if not tag_obj:
+                tag_obj = tags(tags_name=tag_name)
+                db.session.add(tag_obj)
+                db.session.flush()
+
+            exists = post_tags.query.filter_by(
+                post_id=new_post.post_id,
+                tags_id=tag_obj.tags_id
+            ).first()
+            if not exists:
+                db.session.add(post_tags(
+                    post_id=new_post.post_id,
+                    tags_id=tag_obj.tags_id
+                ))
+
         db.session.commit()
 
         return jsonify({
@@ -133,6 +181,24 @@ def edit_post(post_id):
         return jsonify({"success": False, "error": "empty"}), 400
 
     post.content = content
+
+    # 既存の関連を全削除
+    post_tags.query.filter_by(post_id=post.post_id).delete()
+
+    # 再抽出して再登録
+    tags_data = extract_tags(content)
+    for tag_name in tags_data:
+        tag_obj = tags.query.filter_by(tags_name=tag_name).first()
+        if not tag_obj:
+            tag_obj = tags(tags_name=tag_name)
+            db.session.add(tag_obj)
+            db.session.flush()
+
+        db.session.add(post_tags(
+            post_id=post.post_id,
+            tags_id=tag_obj.tags_id
+        ))
+
     db.session.commit()
 
     return jsonify({

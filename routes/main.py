@@ -63,6 +63,7 @@ def home():
     return render_template("home.html", user=user)
     
 
+# 投稿取得API（無限スクロール用）
 @main_bp.route('/api/posts')
 @login_required # ログイン必須
 def get_posts():
