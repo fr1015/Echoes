@@ -86,8 +86,9 @@
     </div>
   </div>
 
+  {% set q_param = request.args.get('q') %}
   <div class="sp-search">
-    <input class="search-input" type="text" placeholder="キーワードで検索..." id="spSearchInput">
+    <input class="search-input" type="text" placeholder="キーワードで検索..." id="spSearchInput" value="{{ q_param or '' }}">
     <button class="search-btn" onclick="doSearch('sp')">検索</button>
   </div>
 
@@ -129,11 +130,11 @@
     {% set date_param = request.args.get('date') %}
     {% if pagination.has_prev %}
       {% if date_param %}
-        <a href="{{ url_for('postlog_bp.postlog', page=1, date=date_param) }}">最初</a>
-        <a href="{{ url_for('postlog_bp.postlog', page=pagination.prev_num, date=date_param) }}">前へ</a>
+        <a href="{{ url_for('postlog_bp.postlog', page=1, date=date_param, q=q_param) }}">最初</a>
+        <a href="{{ url_for('postlog_bp.postlog', page=pagination.prev_num, date=date_param, q=q_param) }}">前へ</a>
       {% else %}
-        <a href="{{ url_for('postlog_bp.postlog', page=1) }}">最初</a>
-        <a href="{{ url_for('postlog_bp.postlog', page=pagination.prev_num) }}">前へ</a>
+        <a href="{{ url_for('postlog_bp.postlog', page=1, q=q_param) }}">最初</a>
+        <a href="{{ url_for('postlog_bp.postlog', page=pagination.prev_num, q=q_param) }}">前へ</a>
       {% endif %}
     {% endif %}
 
@@ -143,9 +144,9 @@
           <span class="is-current">{{ p }}</span>
         {% else %}
           {% if date_param %}
-            <a href="{{ url_for('postlog_bp.postlog', page=p, date=date_param) }}">{{ p }}</a>
+            <a href="{{ url_for('postlog_bp.postlog', page=p, date=date_param, q=q_param) }}">{{ p }}</a>
           {% else %}
-            <a href="{{ url_for('postlog_bp.postlog', page=p) }}">{{ p }}</a>
+            <a href="{{ url_for('postlog_bp.postlog', page=p, q=q_param) }}">{{ p }}</a>
           {% endif %}
         {% endif %}
       {% else %}
@@ -155,11 +156,11 @@
 
     {% if pagination.has_next %}
       {% if date_param %}
-        <a href="{{ url_for('postlog_bp.postlog', page=pagination.next_num, date=date_param) }}">次へ</a>
-        <a href="{{ url_for('postlog_bp.postlog', page=pagination.pages, date=date_param) }}">最後</a>
+        <a href="{{ url_for('postlog_bp.postlog', page=pagination.next_num, date=date_param, q=q_param) }}">次へ</a>
+        <a href="{{ url_for('postlog_bp.postlog', page=pagination.pages, date=date_param, q=q_param) }}">最後</a>
       {% else %}
-        <a href="{{ url_for('postlog_bp.postlog', page=pagination.next_num) }}">次へ</a>
-        <a href="{{ url_for('postlog_bp.postlog', page=pagination.pages) }}">最後</a>
+        <a href="{{ url_for('postlog_bp.postlog', page=pagination.next_num, q=q_param) }}">次へ</a>
+        <a href="{{ url_for('postlog_bp.postlog', page=pagination.pages, q=q_param) }}">最後</a>
       {% endif %}
     {% endif %}
   </div>
@@ -207,7 +208,7 @@
     <div class="widget-title">キーワード検索</div>
 
     <div class="search-box">
-      <input class="search-input" type="text" placeholder="検索ワード" id="searchInput">
+      <input class="search-input" type="text" placeholder="検索ワード" id="searchInput" value="{{ q_param or '' }}">
       <button class="search-btn" onclick="doSearch('pc')">🔍</button>
     </div>
 

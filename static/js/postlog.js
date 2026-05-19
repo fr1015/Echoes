@@ -175,10 +175,14 @@ function jumpToRandom() {
 // ==========================================================
 function doSearch(from) {
   const id = from === "sp" ? "spSearchInput" : "searchInput";
-  const q  = document.getElementById(id)?.value.trim();
-  if (!q) return;
-  // [FLASK] window.location.href = `/post-log?q=${encodeURIComponent(q)}`;
-  alert(`「${q}」で検索（Flask連携後に実装）`);
+  const q = document.getElementById(id)?.value.trim() || "";
+  const params = new URLSearchParams(window.location.search);
+
+  if (q) params.set("q", q);
+  else params.delete("q");
+
+  params.delete("page");
+  window.location.href = `/postlog?${params.toString()}`;
 }
 
 ["searchInput","spSearchInput"].forEach(id => {

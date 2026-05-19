@@ -7,6 +7,7 @@ from sqlalchemy import func
 from datetime import datetime, timedelta
 from datetime import timezone
 from zoneinfo import ZoneInfo
+import re
 
 JST = ZoneInfo("Asia/Tokyo")
 
@@ -25,9 +26,18 @@ def postlog():
 
     # date=YYYY-MM-DD のパラメータ受け取り
     date_str = request.args.get("date")
+
+    # 検索（スペース区切りAND）
+    q = (request.args.get("q") or "").strip()
+    terms = [t for t in re.split(r"[\s\u3000]+", q) if t]
+
     # base query
     all_posts_q = posts.query
     page_q = all_posts_q
+
+    if terms:
+        for term in terms:
+            page_q = page_q.filter(posts.content.ilike(f"%{term}%"))
 
     if date_str:
         # JST日付に合わせてフィルタ
