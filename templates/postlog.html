@@ -12,6 +12,8 @@
   <link rel="stylesheet" href="../static/css/reset.css">
   <link rel="stylesheet" href="../static/css/common.css">
   <link rel="stylesheet" href="../static/css/postlog.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/twemoji@14.0.2/dist/twemoji.min.js"></script>
 </head>
 
 <body>
@@ -276,5 +278,8 @@
   {{ post_count_map | tojson }}
 </script>
 <script src="../static/js/postlog.js"></script>
+<script>
+twemoji.parse(document.body);
+</script>
 </body>
 </html>

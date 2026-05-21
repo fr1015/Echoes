@@ -260,6 +260,9 @@ function addPostToTimeline(post, prepend = false) {
   const timeEl = postEl.querySelector(".post-time");
   timeEl.textContent = relativeTime;
 
+  // 絵文字の変換
+  twemoji.parse(postEl);
+
 
 
   // ピンのトグルボタン
