@@ -58,26 +58,19 @@ def extract_tags(text: str) -> list[str]:
 
 
 # 画像保存
-
-UPLOAD_FOLDER = "uploads"
+UPLOAD_FOLDER = os.path.join("static", "uploads")
 
 def save_image(image):
-
-    # アップロードフォルダが存在しない場合は作成
     os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-    # ファイル名をUUIDで生成して保存
     ext = os.path.splitext(image.filename)[1]
-    filename = f"{uuid.uuid4()}{ext}"
-    filename = secure_filename(filename)
+    filename = secure_filename(f"{uuid.uuid4()}{ext}")
 
-    # ファイルを保存
     save_path = os.path.join(UPLOAD_FOLDER, filename)
     image.save(save_path)
 
-    # 保存したファイルのパスを返す
-    return save_path
-
+    # DB には Web から参照できる相対パスを保存する
+    return f"uploads/{filename}"
 
 
 # ポスト作成処理
@@ -91,26 +84,30 @@ def create_post():
         quote_of_post_id = request.form.get("quote_of_post_id")
         repost_of_post_id = request.form.get("repost_of_post_id")
 
-        #　本文を取得して前後の空白と改行を削除
         content = request.form.get("content", "").strip()
-        #  本文が空の場合はエラー、画像がある場合は本文が空でもOK
-        if not content:
-            if 'image' not in request.files:
-                return jsonify({
-                    "success": False,
-                    "error": "本文が空です"
-                }), 400
-            else:
-                pass
 
-        # コンテンツハッシュを本文＋投稿日時から生成
-        content_hash = hashlib.sha256((content + str(datetime.datetime.utcnow())).encode('utf-8')).hexdigest()
-        
-        # 新しいポストインスタンスを作成
+        # 画像ファイルの取得
+        images = [
+            image for image in request.files.getlist("images")
+            if image and image.filename
+        ]
+
+        if not content and not images:
+            return jsonify({
+                "success": False,
+                "error": "本文が空です"
+            }), 400
+
+        # content_hash を生成（内容と現在時刻の組み合わせでユニークに）
+        content_hash = hashlib.sha256(
+            (content + str(datetime.datetime.utcnow())).encode("utf-8")
+        ).hexdigest()
+
+        # DB に保存
         new_post = posts(
             user_id=user_id,
             content=content,
-            created_app='Echoes',
+            created_app="Echoes",
             created_at=datetime.datetime.utcnow(),
             post_type=post_type,
             reply_to_post_id=reply_to_post_id,
@@ -118,12 +115,19 @@ def create_post():
             repost_of_post_id=repost_of_post_id,
             content_hash=content_hash
         )
-        
-        # DBに追加してコミット
-        db.session.add(new_post)
-        db.session.flush()  # post_id を生成するために flush
 
-        # タグ抽出 → tags / post_tags へ登録
+        db.session.add(new_post)
+        db.session.flush()
+
+        for sort_order, image in enumerate(images, start=1):
+            image_path = save_image(image)
+            db.session.add(post_images(
+                post_id=new_post.post_id,
+                image_path=image_path,
+                sort_order=sort_order
+            ))
+
+        # タグの抽出と保存
         tags_data = extract_tags(content)
         for tag_name in tags_data:
             tag_obj = tags.query.filter_by(tags_name=tag_name).first()
@@ -146,7 +150,7 @@ def create_post():
 
         return jsonify({
             "success": True,
-            "post" : {
+            "post": {
                 "post_id": new_post.post_id,
                 "content": new_post.content,
                 "created_at": new_post.created_at.isoformat() + "Z",
@@ -156,9 +160,19 @@ def create_post():
                 "quote_of_post_id": new_post.quote_of_post_id,
                 "repost_of_post_id": new_post.repost_of_post_id,
                 "user_id": new_post.user_id,
-                "username": new_post.user.username
+                "username": new_post.user.username,
+                "is_pinned": new_post.is_pinned,
+                "images": [
+                    {
+                        "image_id": image.image_id,
+                        "image_path": image.image_path,
+                        "image_url": url_for("static", filename=image.image_path)
+                    }
+                    for image in sorted(new_post.post_images, key=lambda x: x.sort_order)
+                ]
             }
         })
+
     except Exception as e:
         db.session.rollback()
         print(f"Error creating post: {e}")

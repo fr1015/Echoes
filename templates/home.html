@@ -26,6 +26,15 @@
       <div class="avatar sm"></div>
       <div class="modal-composer-body">
         <textarea id="modalPostText" placeholder="いまどうしてる？" maxlength="500" oninput="updateModalCharCount()"></textarea>
+        <input id="modalPostImages" type="file" accept="image/*" multiple hidden onchange="handleModalPostImagesChange(event)">
+        <div class="composer-image-tools">
+          <button type="button" class="image-attach-btn" onclick="document.getElementById('modalPostImages').click()">
+            <i class="fa-regular fa-image"></i>
+            画像を添付
+          </button>
+          <span class="image-count" id="modalImageCount">0 / 10</span>
+        </div>
+        <div class="image-preview-grid" id="modalImagePreview"></div>
         <div class="modal-footer">
           <span class="char-count" id="modalCharCount">0 / 500</span>
           <button id="modalSubmitBtn" onclick="submitModalPost()">ポストする</button>
@@ -98,6 +107,15 @@
       <div class="avatar sm"></div>
       <div class="composer-body">
         <textarea id="postText" placeholder="いまどうしてる？" maxlength="500" oninput="updateCharCount()"></textarea>
+        <input id="postImages" type="file" accept="image/*" multiple hidden onchange="handlePostImagesChange(event)">
+        <div class="composer-image-tools">
+          <button type="button" class="image-attach-btn" onclick="document.getElementById('postImages').click()">
+            <i class="fa-regular fa-image"></i>
+            画像を添付
+          </button>
+          <span class="image-count" id="postImageCount">0 / 10</span>
+        </div>
+        <div class="image-preview-grid" id="postImagePreview"></div>
         <div class="composer-footer">
           <span class="char-count" id="charCount">0 / 500</span>
           <button id="submit-btn" onclick="submitPost()">ポストする</button>

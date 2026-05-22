@@ -6,6 +6,7 @@ from routes.login_auth import login_auth_bp
 from routes.crud import create_post
 from datetime import datetime, timezone
 from sqlalchemy import text
+from sqlalchemy.orm import selectinload
 import re
 from markupsafe import escape, Markup
 
@@ -67,9 +68,8 @@ def home():
 @main_bp.route('/api/posts')
 @login_required # ログイン必須
 def get_posts():
-     query = posts.query
-     
-    
+     query = posts.query.options(selectinload(posts.post_images))
+
      last_updated_at = request.args.get("last_updated_at")
      last_post_id = request.args.get("last_post_id")
 
@@ -117,7 +117,15 @@ def get_posts():
              "updated_at": post.updated_at.isoformat() + "Z",
              "user_id": post.user_id,
              "username": post.user.username,
-             "is_pinned": post.is_pinned
+             "is_pinned": post.is_pinned,
+             "images": [
+                 {
+                     "image_id": image.image_id,
+                     "image_path": image.image_path,
+                     "image_url": url_for("static", filename=image.image_path)
+                 }
+                 for image in sorted(post.post_images, key=lambda x: x.sort_order)
+             ]
          }
 
      result = []

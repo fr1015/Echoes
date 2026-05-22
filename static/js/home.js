@@ -78,7 +78,69 @@ let hasMore = true;
 // 次回API取得時の基準になる
 let lastUpdatedAt = null;
 let lastPostId = null;
-
+const MAX_ATTACH_IMAGES = 10;
+let postImages = [];
+let modalPostImages = [];
+// ファイルの追加
+function createImageFileList(files) {
+  const dt = new DataTransfer();
+  files.forEach(file => dt.items.add(file));
+  return dt.files;
+}
+// 画像プレビュー表示
+function renderImagePreview(containerId, files, removeHandlerName) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = "";
+  files.forEach((file, index) => {
+    const item = document.createElement("div");
+    item.className = "image-preview-item";
+    item.innerHTML = `
+      <img src="${URL.createObjectURL(file)}" alt="添付画像 ${index + 1}">
+      <button type="button" class="image-preview-remove" onclick="${removeHandlerName}(${index})">✕</button>
+    `;
+    container.appendChild(item);
+  });
+}
+// ファイル数表示
+function syncImageCount(countId, files) {
+  const el = document.getElementById(countId);
+  if (el) el.textContent = `${files.length} / ${MAX_ATTACH_IMAGES}`;
+}
+// ファイルの追加イベント
+function handlePostImagesChange(event) {
+  const selected = Array.from(event.target.files || []);
+  postImages = [...postImages, ...selected].slice(0, MAX_ATTACH_IMAGES);
+  event.target.files = createImageFileList(postImages);
+  renderImagePreview("postImagePreview", postImages, "removePostImage");
+  syncImageCount("postImageCount", postImages);
+  event.target.value = "";
+}
+// ファイルの削除
+function removePostImage(index) {
+  postImages.splice(index, 1);
+  const input = document.getElementById("postImages");
+  input.files = createImageFileList(postImages);
+  renderImagePreview("postImagePreview", postImages, "removePostImage");
+  syncImageCount("postImageCount", postImages);
+}
+// モーダルの投稿画像追加
+function handleModalPostImagesChange(event) {
+  const selected = Array.from(event.target.files || []);
+  modalPostImages = [...modalPostImages, ...selected].slice(0, MAX_ATTACH_IMAGES);
+  event.target.files = createImageFileList(modalPostImages);
+  renderImagePreview("modalImagePreview", modalPostImages, "removeModalPostImage");
+  syncImageCount("modalImageCount", modalPostImages);
+  event.target.value = "";
+}
+// モーダルの画像削除
+function removeModalPostImage(index) {
+  modalPostImages.splice(index, 1);
+  const input = document.getElementById("modalPostImages");
+  input.files = createImageFileList(modalPostImages);
+  renderImagePreview("modalImagePreview", modalPostImages, "removeModalPostImage");
+  syncImageCount("modalImageCount", modalPostImages);
+}
 
 // ===== 初期化 =====
 
@@ -161,52 +223,58 @@ async function submitPost() {
   try {
     // 投稿内容を取得
     const content = document.getElementById("postText").value;
+ 
+     // 空投稿防止
+     if (!content.trim() && postImages.length === 0) {
+       alert("投稿内容を入力してください");
+       return;
+     }
+ 
+     // FormData作成
+     const formData = new FormData();
+     formData.append("content", content);
+     postImages.forEach(image => formData.append("images", image));
 
-    // 空投稿防止
-    if (!content.trim()) {
-      alert("投稿内容を入力してください");
-      return;
-    }
 
-    // FormData作成
-    const formData = new FormData();
-    formData.append("content", content);
+     // POSTリクエスト送信
+     const response = await fetch("/post/create", {
+       method: "POST",
+       body: formData,
+     });
 
-    // POSTリクエスト送信
-    const response = await fetch("/post/create", {
-      method: "POST",
-      body: formData,
-    });
+     // JSON変換
+     const data = await response.json();
 
-    // JSON変換
-    const data = await response.json();
+     // 投稿成功
+     if (data.success) {
+       // TLへ追加
+       addPostToTimeline(data.post, true);
+       // 入力欄クリア
+       document.getElementById("postText").value = "";
+       postImages = [];
+       document.getElementById("postImages").value = "";
+       renderImagePreview("postImagePreview", postImages, "removePostImage");
+       syncImageCount("postImageCount", postImages);
+ 
+     } else {
+       // 投稿失敗
+       alert("投稿に失敗しました: " + data.error);
+     }
 
-    // 投稿成功
-    if (data.success) {
-      // TLへ追加
-      addPostToTimeline(data.post, true);
-      // 入力欄クリア
-      document.getElementById("postText").value = "";
+   } catch (error) {
+     console.error("Error submitting post:", error);
+     alert("通信エラーが発生しました");
+   } finally {
 
-    } else {
-      // 投稿失敗
-      alert("投稿に失敗しました: " + data.error);
-    }
+     // フラグ解除
+     isPosting = false;
 
-  } catch (error) {
-    console.error("Error submitting post:", error);
-    alert("通信エラーが発生しました");
-  } finally {
+     // ボタン再有効化
+     postbutton.disabled = false;
 
-    // フラグ解除
-    isPosting = false;
-
-    // ボタン再有効化
-    postbutton.disabled = false;
-
-  }
-  // 文字数カウント更新
-  updateCharCount();
+   }
+   // 文字数カウント更新
+   updateCharCount();
 }
 
 // タイムラインに投稿を追加
@@ -234,6 +302,15 @@ function addPostToTimeline(post, prepend = false) {
           <div class="post-content">
             <p>${linkify(post.content)}</p>
           </div>
+          ${Array.isArray(post.images) && post.images.length
+    ? `<div class="post-image-grid">
+        ${post.images.map(image => `
+          <div class="post-image-item">
+            <img src="${image.image_url}" alt="投稿画像">
+          </div>
+        `).join("")}
+       </div>`
+    : ""}
           <div class="post-actions">
             <button class="post-action-btn" title="リプライ">
               <i class="fa-regular fa-comment"></i>
@@ -538,19 +615,23 @@ function initializeCharCounts() {
 // モーダルの投稿
 async function submitModalPost() {
   const ta = document.getElementById("modalPostText");
-  if (!ta.value.trim()) return;
-  
-  // 値を一時保存
   const content = ta.value;
-  
-  // PC側のテキストエリアに一時的に設定
+
+  if (!content.trim() && modalPostImages.length === 0) return;
+
   document.getElementById("postText").value = content;
-  
-  // submitPost()を実行
+  postImages = [...modalPostImages];
+  document.getElementById("postImages").files = createImageFileList(postImages);
+  renderImagePreview("postImagePreview", postImages, "removePostImage");
+  syncImageCount("postImageCount", postImages);
+
   await submitPost();
-  
-  // モーダル側をクリア
+
   ta.value = "";
+  modalPostImages = [];
+  document.getElementById("modalPostImages").value = "";
+  renderImagePreview("modalImagePreview", modalPostImages, "removeModalPostImage");
+  syncImageCount("modalImageCount", modalPostImages);
   updateModalCharCount();
   closeModal();
   addHeatmapPost();
