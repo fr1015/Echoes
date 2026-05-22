@@ -105,7 +105,18 @@ function renderImagePreview(containerId, files, removeHandlerName) {
 // ファイル数表示
 function syncImageCount(countId, files) {
   const el = document.getElementById(countId);
-  if (el) el.textContent = `${files.length} / ${MAX_ATTACH_IMAGES}`;
+  if (el) {
+    el.textContent = `${files.length} / ${MAX_ATTACH_IMAGES}`;
+    el.style.display = files.length > 0 ? "inline" : "none";
+  }
+  // 対応するプレビュー領域を表示/非表示
+  let previewId = null;
+  if (countId === "postImageCount") previewId = "postImagePreview";
+  if (countId === "modalImageCount") previewId = "modalImagePreview";
+  if (previewId) {
+    const preview = document.getElementById(previewId);
+    if (preview) preview.style.display = files.length > 0 ? "grid" : "none";
+  }
 }
 // ファイルの追加イベント
 function handlePostImagesChange(event) {
@@ -148,6 +159,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // テーマを復元
   loadTheme();
+
+  // 画像プレビューと件数は初期非表示
+  const postPreview = document.getElementById('postImagePreview');
+  if (postPreview) postPreview.style.display = 'none';
+  const modalPreview = document.getElementById('modalImagePreview');
+  if (modalPreview) modalPreview.style.display = 'none';
+  const postCount = document.getElementById('postImageCount');
+  if (postCount) postCount.style.display = 'none';
+  const modalCount = document.getElementById('modalImageCount');
+  if (modalCount) modalCount.style.display = 'none';
 
   // 初回投稿取得
   loadPosts();

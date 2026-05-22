@@ -346,7 +346,11 @@ body.dark *{
 
 .modal-footer {
     display: flex; align-items: center;
-    justify-content: flex-end; gap: 12px;
+    justify-content: space-between; gap: 12px;
+}
+
+.counts {
+    display: flex; align-items: center; gap: 12px;
 }
 
 /* ===== スマホ用（非表示のもの） ===== */

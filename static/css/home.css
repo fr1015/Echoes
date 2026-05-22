@@ -167,7 +167,7 @@
 
 .composer-footer {
     display: flex; align-items: center;
-    justify-content: flex-end; gap: 12px;
+    justify-content: space-between; gap: 12px;
 }
 
 .char-count { font-size: 11px; color: var(--text-muted); font-family: 'DM Mono', monospace; }
