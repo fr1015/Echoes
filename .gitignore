@@ -1,7 +1,6 @@
 .venv/
 .env
-db/
-*.db
+db/Echoes.db
 *.sqlite3
 __pycache__/
 *.pyc
