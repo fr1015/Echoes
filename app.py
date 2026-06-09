@@ -67,7 +67,11 @@ def create_app():
 
 app = create_app()
 
+import os
 
+print("Current working directory:", os.getcwd())
+print("DATABASE_URL:", app.config['SQLALCHEMY_DATABASE_URI'])
+print("DB exists:", os.path.exists("db/database.db"))
 
 # =================================================================================================
 
