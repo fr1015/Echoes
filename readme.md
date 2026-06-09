@@ -2,6 +2,7 @@
 
 Flaskで開発した個人向けSNSライクマイクロブログアプリです。
 X（旧Twitter）やMisskeyを参考に、投稿・検索・ハッシュタグ管理・プロフィール履歴管理などの機能を実装しています。
+デモ版：https://echoes-ymgs.onrender.com/
 
 ---
 
